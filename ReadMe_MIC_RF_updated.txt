@@ -35,7 +35,9 @@ Data Dictionary from NARMS:
 #################################################################################################################
 To run code: 
 
--Please begin by opening the R project file "Final RF AJVR Scripts.Rproj"
+-Please begin by unziping the folder "renv"
+
+-Then, open the R project file "Final RF AJVR Scripts.Rproj"
 
 -We have used the renv() package to preserve the versions of the various packages used in this project. 
 
