@@ -1,0 +1,622 @@
+---
+title: "Model_for_Each_CLSI_Class"
+format: html
+editor: visual
+---
+
+# Ampicillin (AMP)
+
+-   CLSI Class: cephems
+
+    ## Filtering AMP isolates
+
+    ##### Filtering AMP isolates into a separate dataframe to build RF
+
+    ```{r}
+    AMP.RF.df <- NARMSCattleCombined_ordinal   
+
+    #checking if there are any NAs for variable in this dataframe 
+    (sum(is.na(AMP.RF.df[24]))/nrow(AMP.RF.df)*100) #returns 0.0085 ~0 
+
+    #further filter dataframe to only include isolates with AMP data 
+    AMP.RF.df <- AMP.RF.df %>%      
+      filter(!is.na(AMP))    
+
+    #checking again to see if there are any NAs for AMP in dataframe  
+    (sum(is.na(AMP.RF.df[24]))/nrow(AMP.RF.df)*100) #returns 0, so no missing values now
+    ```
+
+    ##### Check dependent variable (what predicting) is a factor in dataframe
+
+    ```{r}
+    is.factor(AMP.RF.df$AMP) #returns TRUE 
+    ```
+
+    ##### Make all categorical variables in dataframe factors
+
+    ```{r}
+    CategoricalVar<-c("STATE", "Year", "Month", "RAISING_CLAIM", "COUNTRY_OF_ORIGIN", "SOURCE", "SOURCE_SPECIES_INFO", "BRAND", "BRAND_NAME", "dataset_source", "HOST_SPECIES") 
+
+    AMP.RF.df[CategoricalVar]<-lapply(AMP.RF.df[CategoricalVar], factor) 
+
+    remove(CategoricalVar) 
+    #Resist.Genes variables (ex: Aminoglycoside.Resist.Genes), GENOTYPE were not included in model because majority of isolates do not have this information
+    ```
+
+    ## Missing Data Analysis for Antimicrobials
+
+    ##### For each AM, what percentage of total number of isolates were tested against that AM
+
+    ```{r}
+    MissingDataAnalysis_AMs(AMP.RF.df)
+    ```
+
+|         |                  |
+|---------|------------------|
+| **AMC** | **100.00000000** |
+| **AMP** | **100.00000000** |
+| **AXO** | **100.00000000** |
+| **CHL** | **100.00000000** |
+| **CIP** | **100.00000000** |
+| **COT** | **100.00000000** |
+| **FOX** | **100.00000000** |
+| **GEN** | **100.00000000** |
+| **NAL** | **100.00000000** |
+| **TET** | **100.00000000** |
+| Str     | 99.99146175      |
+| **FIS** | **94.86851093**  |
+| AZI     | 78.04815574      |
+| MER     | 51.72472678      |
+| TIO     | 48.27527322      |
+| KAN     | 32.19774590      |
+| AMI     | 21.95184426      |
+| CEP     | 5.13148907       |
+| SMX     | 5.13148907       |
+| ATM     | 0.05122951       |
+| CAZ     | 0.05122951       |
+| CTX     | 0.05122951       |
+| FEP     | 0.05122951       |
+| IMI     | 0.05122951       |
+| PTZ     | 0.05122951       |
+| APR     | 0.00000000       |
+| CLI     | 0.00000000       |
+| DAP     | 0.00000000       |
+| DOX     | 0.00000000       |
+| ERY     | 0.00000000       |
+| FFN     | 0.00000000       |
+| LIN     | 0.00000000       |
+| LZD     | 0.00000000       |
+| NIT     | 0.00000000       |
+| PEN     | 0.00000000       |
+| QDA     | 0.00000000       |
+| TEL     | 0.00000000       |
+| TGC     | 0.00000000       |
+| TYL     | 0.00000000       |
+| VAN     | 0.00000000       |
+
+11 predictor variables tested on \>90% isolates and so can be used in model (not using Str because of change in concentrations tested over time)
+
+## Missing Data Analysis for Categorical Variables
+
+##### For each categorical variable, what percentage of total number of isolates were tested against that variable
+
+```{r}
+MissingDataAnalysis_CategoricalVar(AMP.RF.df)
+```
+
+| **Variable Name** | **Percent_of_Isolates_Tested** |
+|:------------------|:-------------------------------|
+
+|                     |            |
+|---------------------|------------|
+| STATE               | 39.079577  |
+| Month               | 88.200137  |
+| Year                | 100.000000 |
+| dataset_source      | 100.000000 |
+| RAISING_CLAIM       | 4.482582   |
+| SOURCE_SPECIES_INFO | 77.339481  |
+| SOURCE              | 100.000000 |
+| GROWTH              | 39.079577  |
+| ACQUISITION_DATE    | 99.846311  |
+| COUNTRY_OF_ORIGIN   | 11.586407  |
+| BRAND               | 35.647199  |
+| BRAND_NAME          | 36.057036  |
+| GENOTYPE            | 9.998292   |
+| HOST_SPECIES        | 100.000000 |
+| CUTS                | 20.039276  |
+| MEAT_TYPE           | 39.079577  |
+
+##### Checking Levels for Categorical Variables with 90% plus data:
+
+```{r}
+levels(AMP.RF.df$Year)
+```
+
+```{r}
+levels(AMP.RF.df$dataset_source)
+```
+
+```{r}
+levels(AMP.RF.df$SOURCE)
+```
+
+```{r}
+levels(AMP.RF.df$HOST_SPECIES)
+```
+
+Possible Categorical Variable Predictor Variables: (have enough data filled in and have unique levels)
+
+-   Year
+-   SOURCE
+
+## Create 70% Training 30% Testing Split
+
+```{r}
+#set a random seed and shuffle data frame to get random sample of data in both the testing and training set 
+set.seed(1234) 
+AMP.RF.df<-AMP.RF.df[sample(1:nrow(AMP.RF.df)), ]
+```
+
+```{r}
+#use 70% data for training and other 30% for testing  
+
+# get the number 70/30 training test split 
+numberOfTrainingSamples <- round(length(AMP.RF.df$AMP) * .7)  
+
+# training data 
+set.seed(1234) 
+trainAMPRF <- AMP.RF.df[1:numberOfTrainingSamples,] 
+trainAMPRF_labels <- AMP.RF.df$AMP[1:numberOfTrainingSamples]  
+
+# testing data 
+set.seed(1234) 
+testAMPRF <- AMP.RF.df[-(1:numberOfTrainingSamples),] 
+testAMPRF_labels <- AMP.RF.df$AMP[-(1:numberOfTrainingSamples)]  
+
+remove(numberOfTrainingSamples)
+```
+
+## Balancing AMP Levels
+
+##### Look at original training data distribution
+
+```{r}
+table(trainAMPRF$AMP)
+```
+
+##### Try oversampling
+
+```{r}
+#Oversample to balance all MIC categories 
+set.seed(71)
+over.AMP.RF.df<- RandOverClassif(AMP~., trainAMPRF, "balance") 
+#"balance" tries to balance all existing classes  
+
+table(over.AMP.RF.df$AMP) #This oversamples other categories so that there are 3582 rows (number of observations of majority category) for each
+```
+
+##### Try a mix of undersampling and oversampling
+
+```{r}
+#Undersample MIC category 2 and 4
+set.seed(71)
+C.perc= list("1"=0.65,"2"=0.15, "4"=0.15)
+under_over.AMP.RF.df<- RandUnderClassif(AMP~., trainAMPRF, C.perc)
+
+table(under_over.AMP.RF.df$AMP) #first undersample 2 and 4
+
+#Oversample MIC category 1, 8, 16, 32
+set.seed(71)
+C.perc= list("8"=4.5, "16"=25)
+under_over.AMP.RF.df<- RandOverClassif(AMP~., under_over.AMP.RF.df, C.perc )
+
+table(under_over.AMP.RF.df$AMP) #then oversample
+```
+
+## Random Forest:
+
+### Original
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71) 
+RFAMP<-randomForest(AMP~Year+SOURCE+AMC+AXO+CHL+CIP+COT+FOX+GEN+NAL+TET+FIS, data=trainAMPRF, na.action=na.exclude, ntree=500, importance=TRUE) 
+RFAMP 
+#33% OOB estimate of error rate 
+#ntree=500 
+#mtry=3 (number of variables tried at each split)   
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power 
+pre.or <- sort(RFAMP$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable pre.or 
+remove(pre.or) 
+
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score 
+varImpPlot(RFAMP, main="")
+```
+
+-   Strongest predictors
+
+    -   Amoxicillin (AMC)- another B lactam
+    -   cefoxitin (cephem)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+trainRFAMP_prediction<- predict(RFAMP,trainAMPRF)  
+trainconMatAMPRF<-confusionMatrix(trainRFAMP_prediction, trainAMPRF$AMP)
+trainconMatAMPRF$table  
+paste('Accuracy =', round(trainconMatAMPRF$overall["Accuracy"],2)) #returns accuracy  
+trainconMatAMPRF$overall #also gives accuracy in output in scientific notation  
+#accuracy is now 78% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+testRFAMP_prediction<-predict(RFAMP,testAMPRF)
+testConMatAMPRF<-confusionMatrix(testRFAMP_prediction,testAMPRF$AMP)
+paste('Accuracy =', round(testConMatAMPRF$overall["Accuracy"],2)) #returns accuracy  
+#accuracy is 68% on test data  
+AMP_RF_ConMat<-testConMatAMPRF$table 
+#saves just the confusion matrix as an object for future analysis
+ 
+testConMatAMPRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.4475921 |
+| 2   | 0.6882004 |
+| 4   | 0.7473854 |
+| 8   | 0.0000000 |
+| 16  | 0.0000000 |
+| 32  | 0.7803468 |
+
+##### Balanced Accuracy:
+
+```{r}
+AMP_RF_AccStats<-testConMatAMPRF$byClass     
+Balanced.Accuracy<-data.matrix(AMP_RF_AccStats[,"Balanced Accuracy"])    
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 1** | 0.7157504 |
+|  **Class: 2** | 0.7063872 |
+|  **Class: 4** | 0.7552025 |
+|  **Class: 8** | 0.5000000 |
+| **Class: 16** | 0.4998499 |
+| **Class: 32** | 0.8863795 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.9886686 |
+| 2   | 0.9973632 |
+| 4   | 0.9855189 |
+| 8   | 0.9130435 |
+| 16  | 0.2500000 |
+| 32  | 0.7861272 |
+
+```{r}
+PlusorMinus1_overall(AMP_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(AMP_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(AMP_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(AMP_RF_ConMat, 16)
+```
+
+### Mix of Under and Over
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)    
+RFAMP<-randomForest(AMP~Year+SOURCE+AXO+CHL+CIP+COT+FOX+GEN+NAL+TET+FIS, data=under_over.AMP.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)    
+RFAMP  
+#34% OOB estimate of error rate    
+#ntree=500    
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power    
+pre.or <- sort(RFAMP$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable
+pre.or    
+remove(pre.or)       
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score    
+varImpPlot(RFAMP, main="")
+```
+
+-   Strongest predictors
+
+    -   year
+
+    -   cefoxitin (cephem)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71) 
+trainRFAMP_prediction<- predict(RFAMP,under_over.AMP.RF.df)     
+trainconMatAMPRF<-confusionMatrix(trainRFAMP_prediction, under_over.AMP.RF.df$AMP)   
+trainconMatAMPRF$table      
+trainconMatAMPRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 84% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71) 
+testRFAMP_prediction<-predict(RFAMP,testAMPRF)
+testConMatAMPRF<-confusionMatrix(testRFAMP_prediction,testAMPRF$AMP)   
+paste('Accuracy =', round(testConMatAMPRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 44% on test data     
+AMP_RF_ConMat<-testConMatAMPRF$table  #saves just the confusion matrix as an object for future analysis
+testConMatAMPRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.5779037 |
+| 2   | 0.4080422 |
+| 4   | 0.3934031 |
+| 8   | 0.3260870 |
+| 16  | 0.2500000 |
+| 32  | 0.7225434 |
+
+##### Balanced Accuracy:
+
+```{r}
+AMP_RF_AccStats<-testConMatAMPRF$byClass      
+Balanced.Accuracy<-data.matrix(AMP_RF_AccStats[,"Balanced Accuracy"])     
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 1** | 0.7155358 |
+|  **Class: 2** | 0.5814263 |
+|  **Class: 4** | 0.5987560 |
+|  **Class: 8** | 0.6182107 |
+| **Class: 16** | 0.6138956 |
+| **Class: 32** | 0.8264946 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.8271955 |
+| 2   | 0.8675016 |
+| 4   | 0.8382944 |
+| 8   | 0.6956522 |
+| 16  | 0.7500000 |
+| 32  | 0.7456647 |
+
+```{r}
+PlusorMinus1_overall(AMP_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(AMP_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(AMP_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(AMP_RF_ConMat, 16)
+```
+
+### BEST MODEL: Oversampling
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)  
+final_RFAMP<-randomForest(AMP~Year+AXO+CHL+CIP+COT+FOX+GEN+NAL+TET+FIS, data=over.AMP.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)  
+final_RFAMP  
+#26% OOB estimate of error rate  
+#ntree=500
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power   
+pre.or <- sort(final_RFAMP$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable  
+pre.or   
+remove(pre.or)   
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score   
+varImpPlot(final_RFAMP, main="")
+```
+
+-   Strongest predictors
+
+    -   year
+
+    -   cefoxitin (cephem)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+final_trainRFAMP_prediction<- predict(final_RFAMP,over.AMP.RF.df)   
+final_trainconMatAMPRF<-confusionMatrix(final_trainRFAMP_prediction, over.AMP.RF.df$AMP) 
+final_trainconMatAMPRF$table   
+
+final_trainconMatAMPRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 77% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+final_testRFAMP_prediction<-predict(final_RFAMP,testAMPRF) 
+final_testConMatAMPRF<-confusionMatrix(final_testRFAMP_prediction,testAMPRF$AMP) 
+paste('Accuracy =', round(final_testConMatAMPRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 46% on test data   
+
+final_AMP_RF_ConMat<-final_testConMatAMPRF$table  #saves just the confusion matrix as an object for future analysis 
+
+final_testConMatAMPRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(final_AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.5835694 |
+| 2   | 0.4087014 |
+| 4   | 0.4601770 |
+| 8   | 0.2608696 |
+| 16  | 0.2500000 |
+| 32  | 0.7398844 |
+
+##### Balanced Accuracy:
+
+```{r}
+AMP_RF_AccStats<-final_testConMatAMPRF$byClass       
+Balanced.Accuracy<-data.matrix(AMP_RF_AccStats[,"Balanced Accuracy"])      
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 1** | 0.7203801 |
+|  **Class: 2** | 0.5922012 |
+|  **Class: 4** | 0.6280818 |
+|  **Class: 8** | 0.5924409 |
+| **Class: 16** | 0.6213986 |
+| **Class: 32** | 0.8285258 |
+
+##### Plus or Minus One Accuracy By Category:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(final_AMP_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.8328612 |
+| 2   | 0.8780488 |
+| 4   | 0.8551891 |
+| 8   | 0.8043478 |
+| 16  | 0.5000000 |
+| 32  | 0.7514451 |
+
+##### Plus or Minus One Accuracy Overall:
+
+```{r}
+PlusorMinus1_overall(final_AMP_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_AMP_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_AMP_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(final_AMP_RF_ConMat, 16)
+```
+
+```{r}
+remove(RFAMP, trainconMatAMPRF, trainRFAMP_prediction, testRFAMP_prediction, testConMatAMPRF, AMP_RF_ConMat, C.perc, AMP_RF_AccStats, Balanced.Accuracy )
+
+remove(over.AMP.RF.df, under_over.AMP.RF.df, final_trainconMatAMPRF, final_trainRFAMP_prediction, trainAMPRF_labels)
+```

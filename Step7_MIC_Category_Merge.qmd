@@ -1,0 +1,543 @@
+# Look at MIC levels for each AM:
+
+### TET- Tetracyclines
+
+```{r}
+table(NARMSCattleCombined_ordinal$TET,NARMSCattleCombined_ordinal$TET.Sign)
+#will not merge any categories
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 4
+
+-   I: 8
+
+-   **R: \>= 16**
+
+#ECOFF Value from EUCAST: **8**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+not needed
+
+### NAL: Quinolones
+
+```{r}
+table(NARMSCattleCombined_ordinal$NAL,NARMSCattleCombined_ordinal$NAL.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 16
+
+-   I: N/A
+
+-   **R: \>= 32**
+
+#ECOFF Value from EUCAST: **8**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New Categories:
+
+-   \<=1
+
+-   =2
+
+-   8
+
+    -   sign \>2-\<=8
+
+    -   combined =8 with =4
+
+-   =16
+
+-   \>=32
+
+```{r}
+NARMSCattleCombined_ordinal$NAL[NARMSCattleCombined_ordinal$NAL==0.5]<- 1
+NARMSCattleCombined_ordinal$NAL[NARMSCattleCombined_ordinal$NAL==4]<- 8
+
+table(NARMSCattleCombined_ordinal$NAL)
+NARMSCattleCombined_ordinal$NAL<- droplevels(NARMSCattleCombined_ordinal$NAL)
+table(NARMSCattleCombined_ordinal$NAL)
+```
+
+### CIP: Quinolones
+
+```{r}
+table(NARMSCattleCombined_ordinal$CIP,NARMSCattleCombined_ordinal$CIP.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 0.06
+
+-   I: \>= 0.12
+
+-   **R: \>= 0.12**
+
+#ECOFF Value from **EUCAST: 0.06**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels
+
+New Categories:
+
+-   \<= 0.015
+
+-   0.06
+
+    -   sign is \>0.015- \<=0.06
+
+    -   combine 0.03 and 0.06 categories
+
+-   \>= 0.125
+
+```{r}
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==0.03]<- 0.06
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==0.25]<- 0.125
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==0.5]<- 0.125
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==1]<- 0.125
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==2]<- 0.125
+NARMSCattleCombined_ordinal$CIP[NARMSCattleCombined_ordinal$CIP==4]<- 0.125
+
+table(NARMSCattleCombined_ordinal$CIP)
+NARMSCattleCombined_ordinal$CIP<- droplevels(NARMSCattleCombined_ordinal$CIP)
+table(NARMSCattleCombined_ordinal$CIP)
+```
+
+### CHL: Phenicol
+
+```{r}
+table(NARMSCattleCombined_ordinal$CHL,NARMSCattleCombined_ordinal$CHL.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 8
+
+-   I: \>= 16
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 16**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New categories
+
+-   \<= 4
+
+-   =8
+
+-   =16
+
+-   \>=32
+
+```{r}
+NARMSCattleCombined_ordinal$CHL[NARMSCattleCombined_ordinal$CHL==2]<- 4
+
+table(NARMSCattleCombined_ordinal$CHL)
+NARMSCattleCombined_ordinal$CHL<- droplevels(NARMSCattleCombined_ordinal$CHL)
+table(NARMSCattleCombined_ordinal$CHL)
+```
+
+### AMP: Phenicol
+
+```{r}
+table(NARMSCattleCombined_ordinal$AMP, NARMSCattleCombined_ordinal$AMP.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 8
+
+-   I: \>= 16
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 8**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+will not change
+
+### AZI: Macrolide
+
+```{r}
+table(NARMSCattleCombined_ordinal$AZI, NARMSCattleCombined_ordinal$AZI.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<=16
+
+-   I: \>= N/A
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 16**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels
+
+New categories:
+
+-   \<=1
+
+-   =2
+
+-   =4
+
+-   =8
+
+-   =16
+
+-   \>=32
+
+```{r}
+NARMSCattleCombined_ordinal$AZI[NARMSCattleCombined_ordinal$AZI==0.25]<- 1
+NARMSCattleCombined_ordinal$AZI[NARMSCattleCombined_ordinal$AZI==0.5]<- 1
+
+table(NARMSCattleCombined_ordinal$AZI)
+NARMSCattleCombined_ordinal$AZI<- droplevels(NARMSCattleCombined_ordinal$AZI)
+table(NARMSCattleCombined_ordinal$AZI)
+```
+
+### COT: Folate Pathway Inhibitor
+
+```{r}
+table(NARMSCattleCombined_ordinal$COT, NARMSCattleCombined_ordinal$COT.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 2
+
+-   I: \>= N/A
+
+-   **R: \>=4**
+
+#ECOFF Value from **EUCAST: 0.5**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New Categories:
+
+-   \<=0.125
+
+-   0.5
+
+    -   sign is \>0.125- \<=0.5
+
+    -   combine 0.25 and 0.5
+
+-   2
+
+    -   sign is \>0.5- \<=2
+
+    -   combine 1 and 2
+
+-   \>=4
+
+```{r}
+NARMSCattleCombined_ordinal$COT[NARMSCattleCombined_ordinal$COT==0.25]<- 0.5
+NARMSCattleCombined_ordinal$COT[NARMSCattleCombined_ordinal$COT==1]<- 2
+
+table(NARMSCattleCombined_ordinal$COT)
+NARMSCattleCombined_ordinal$COT<- droplevels(NARMSCattleCombined_ordinal$COT)
+table(NARMSCattleCombined_ordinal$COT)
+```
+
+### FIS (Folate Pathway Inhibitor)
+
+```{r}
+table(NARMSCattleCombined_ordinal$FIS, NARMSCattleCombined_ordinal$FIS.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 256
+
+-   I: \>= NA
+
+-   **R: \>=512**
+
+#ECOFF Value from **EUCAST: No data available**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New categories
+
+-   \<=16
+
+-   =32
+
+-   128
+
+    -   sign is \>32- \<=128
+
+    -   combine categories 64 and 128
+
+-   \>=256
+
+```{r}
+NARMSCattleCombined_ordinal$FIS[NARMSCattleCombined_ordinal$FIS==64]<- 128
+
+table(NARMSCattleCombined_ordinal$FIS)
+NARMSCattleCombined_ordinal$FIS<- droplevels(NARMSCattleCombined_ordinal$FIS)
+table(NARMSCattleCombined_ordinal$FIS)
+```
+
+### AXO (Cephem)
+
+```{r}
+table(NARMSCattleCombined_ordinal$AXO,NARMSCattleCombined_ordinal$AXO.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 1
+
+-   I: \>= 2
+
+-   **R: \>=4**
+
+#ECOFF Value from **EUCAST: 0.125**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+it's so unbalanced, will skip making a model for AXO
+
+### FOX (Cephem)
+
+```{r}
+table(NARMSCattleCombined_ordinal$FOX,NARMSCattleCombined_ordinal$FOX.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 8
+
+-   I: \>= 16
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 16**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New Categories:
+
+-   \<=2
+
+    -   combine categories 0.5, 1, and 2
+
+-   =4
+
+-   =8
+
+-   =16
+
+-   \>=32
+
+```{r}
+NARMSCattleCombined_ordinal$FOX[NARMSCattleCombined_ordinal$FOX==0.5]<- 2
+NARMSCattleCombined_ordinal$FOX[NARMSCattleCombined_ordinal$FOX==1]<- 2
+
+table(NARMSCattleCombined_ordinal$FOX)
+NARMSCattleCombined_ordinal$FOX<- droplevels(NARMSCattleCombined_ordinal$FOX)
+table(NARMSCattleCombined_ordinal$FOX)
+```
+
+### TIO (Cephem)
+
+```{r}
+table(NARMSCattleCombined_ordinal$TIO, NARMSCattleCombined_ordinal$TIO.Sign)
+```
+
+#NARMS breakpoints given by USDA (not on FDA list)
+
+-   S: \<= 2
+
+-   I: \>=4
+
+-   **R: \>=8**
+
+#ECOFF Value from **EUCAST: 1**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+Due to not wanting to cross NARMS or ECOFF boundaries, will not change categories
+
+### AMC (Beta lactam)
+
+```{r}
+table(NARMSCattleCombined_ordinal$AMC,NARMSCattleCombined_ordinal$AMC.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 8
+
+-   I: \>= 16
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 8**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+Due to not wanting to cross NARMS or ECOFF boundaries, will not change categories
+
+### Str (aminoglycoside)
+
+```{r}
+table(NARMSCattleCombined_ordinal$Str, NARMSCattleCombined_ordinal$STR.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 16
+
+-   I: \>= NA
+
+-   **R: \>=32**
+
+#ECOFF Value from **EUCAST: 16**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New Categories:
+
+-   \<=4
+
+    -   combine categories 2 and 4
+
+-   =8
+
+-   =16
+
+-   \>=32
+
+```{r}
+NARMSCattleCombined_ordinal$Str[NARMSCattleCombined_ordinal$Str==2]<- 4
+
+table(NARMSCattleCombined_ordinal$Str)
+NARMSCattleCombined_ordinal$Str<- droplevels(NARMSCattleCombined_ordinal$Str)
+table(NARMSCattleCombined_ordinal$Str)
+```
+
+### KAN (aminoglycoside)
+
+```{r}
+table(NARMSCattleCombined_ordinal$KAN, NARMSCattleCombined_ordinal$KAN.Sign)
+```
+
+#NARMS breakpoints given by USDA (FDA not available)
+
+-   S: \<= 16
+
+-   I: \>= 32
+
+-   **R: \>=64**
+
+#ECOFF Value from **EUCAST: 16**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+Due to not wanting to cross NARMS or ECOFF boundaries, will not change categories
+
+### GEN (aminoglycoside)
+
+```{r}
+table(NARMSCattleCombined_ordinal$GEN, NARMSCattleCombined_ordinal$GEN.Sign)
+```
+
+#NARMS breakpoints given by FDA
+
+-   S: \<= 4
+
+-   I: \>= 8
+
+-   **R: \>=16**
+
+#ECOFF Value from **EUCAST: 2**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+Due to not wanting to cross NARMS or ECOFF boundaries, will not change categories
+
+### AMI (aminoglycoside)
+
+```{r}
+table(NARMSCattleCombined_ordinal$AMI,NARMSCattleCombined_ordinal$AMI.Sign)
+```
+
+#NARMS breakpoints given by USDA
+
+-   S: \<= 16
+
+-   I: \>= 32
+
+-   **R: \>=64**
+
+#ECOFF Value from **EUCAST: 8**
+
+-   Isolates of a species that have MIC values at or below the ECOFF are members of the wild-type population for the species and agent in question
+
+##### Condense Levels:
+
+New Categories:
+
+-   \<=1
+
+    -   combine categories 0.5 and 1
+
+-   =2
+
+-   =4
+
+-   =8
+
+-   \>=16
+
+    -   will not combine with 8 due to ECOFF boundary
+
+```{r}
+NARMSCattleCombined_ordinal$AMI[NARMSCattleCombined_ordinal$AMI==0.5]<- 1
+
+table(NARMSCattleCombined_ordinal$AMI)
+NARMSCattleCombined_ordinal$AMI<- droplevels(NARMSCattleCombined_ordinal$AMI)
+table(NARMSCattleCombined_ordinal$AMI)
+```
