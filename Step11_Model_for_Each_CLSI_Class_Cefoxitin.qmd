@@ -1,0 +1,597 @@
+---
+title: "Model_for_Each_CLSI_Class"
+format: html
+editor: visual
+---
+
+# Cefoxitin (FOX)
+
+-   CLSI Class: cephems
+
+    ## Filtering Cefoxitin isolates
+
+    ##### Filtering cefoxitin isolates into a separate dataframe to build RF
+
+    ```{r}
+    FOX.RF.df <- NARMSCattleCombined_ordinal
+
+    #checking if there are any NAs for FOX variable in this dataframe  
+    (sum(is.na(FOX.RF.df[60]))/nrow(FOX.RF.df)*100) #returns 0%  
+
+    ```
+
+    ##### Check dependent variable (what predicting) is a factor in dataframe
+
+    ```{r}
+    is.factor(FOX.RF.df$FOX) #returns true
+    ```
+
+    ##### Make all categorical variables in dataframe factors
+
+    ```{r}
+    CategoricalVar<-c("STATE", "Year", "Month", "RAISING_CLAIM", "COUNTRY_OF_ORIGIN", "SOURCE", "SOURCE_SPECIES_INFO", "BRAND", "BRAND_NAME", "dataset_source", "MEAT_TYPE", "HOST_SPECIES")  
+
+    FOX.RF.df[CategoricalVar]<-lapply(FOX.RF.df[CategoricalVar], factor) 
+
+    remove(CategoricalVar)  
+    #Resist.Genes variables (ex: FOXnoglycoside.Resist.Genes), GENOTYPE were not included in model because majority of isolates do not have this information 
+    ```
+
+    ## Missing Data Analysis for Antimicrobials
+
+    ##### For each AM, what percentage of total number of isolates were tested against that AM
+
+    ```{r}
+    MissingDataAnalysis_AMs(FOX.RF.df)
+    ```
+
+|         |                  |
+|---------|------------------|
+| **AMC** | **100.00000000** |
+| **AXO** | **100.00000000** |
+| **CHL** | **100.00000000** |
+| **CIP** | **100.00000000** |
+| **COT** | **100.00000000** |
+| FOX     | 100.00000000     |
+| **GEN** | **100.00000000** |
+| **NAL** | **100.00000000** |
+| **TET** | **100.00000000** |
+| **AMP** | **99.99146248**  |
+| Str     | 99.98292496      |
+| **FIS** | **94.86894903**  |
+| AZI     | 78.04149236      |
+| MER     | 51.72031077      |
+| TIO     | 48.27968923      |
+| KAN     | 32.20353453      |
+| FOX     | 21.95850764      |
+| CEP     | 5.13105097       |
+| SMX     | 5.13105097       |
+| ATM     | 0.05122513       |
+| CAZ     | 0.05122513       |
+| CTX     | 0.05122513       |
+| FEP     | 0.05122513       |
+| IMI     | 0.05122513       |
+| PTZ     | 0.05122513       |
+| APR     | 0.00000000       |
+| CLI     | 0.00000000       |
+| DAP     | 0.00000000       |
+| DOX     | 0.00000000       |
+| ERY     | 0.00000000       |
+| FFN     | 0.00000000       |
+| LIN     | 0.00000000       |
+| LZD     | 0.00000000       |
+| NIT     | 0.00000000       |
+| PEN     | 0.00000000       |
+| QDA     | 0.00000000       |
+| TEL     | 0.00000000       |
+| TGC     | 0.00000000       |
+| TYL     | 0.00000000       |
+| VAN     | 0.00000000       |
+
+10 predictor variables tested on \>90% isolates and so can be used in model (not using Str because of change in concentrations tested over time)
+
+## Missing Data Analysis for Categorical Variables
+
+##### For each categorical variable, what percentage of total number of isolates were tested against that variable
+
+```{r}
+MissingDataAnalysis_CategoricalVar(FOX.RF.df)
+```
+
+| **Variable Name** | **Percent_of_Isolates_Tested** |
+|:------------------|:-------------------------------|
+
+|                     |                |
+|---------------------|----------------|
+| **Year**            | **100.000000** |
+| **dataset_source**  | **100.000000** |
+| **SOURCE**          | **100.000000** |
+| **HOST_SPECIES**    | **100.000000** |
+| ACQUISITION_DATE    | 99.846325      |
+| Month               | 88.201144      |
+| SOURCE_SPECIES_INFO | 77.332878      |
+| STATE               | 39.084778      |
+| GROWTH              | 39.084778      |
+| MEAT_TYPE           | 39.084778      |
+| BRAND_NAME          | 36.062495      |
+| BRAND               | 35.652694      |
+| CUTS                | 20.037565      |
+| COUNTRY_OF_ORIGIN   | 11.585418      |
+| GENOTYPE            | 9.997439       |
+| RAISING_CLAIM       | 4.482199       |
+
+##### Checking Levels for Categorical Variables with 90% plus data:
+
+```{r}
+levels(FOX.RF.df$Year)
+```
+
+```{r}
+levels(FOX.RF.df$dataset_source)
+```
+
+```{r}
+levels(FOX.RF.df$SOURCE)
+```
+
+```{r}
+levels(FOX.RF.df$HOST_SPECIES)
+```
+
+Possible Categorical Variable Predictor Variables: (have enough data filled in and have unique levels)
+
+-   Year
+-   SOURCE
+
+## Create 70% Training 30% Testing Split
+
+```{r}
+#set a random seed and shuffle data frame to get random sample of data in both the testing and training set   
+set.seed(1234)   
+FOX.RF.df<-FOX.RF.df[sample(1:nrow(FOX.RF.df)), ]
+```
+
+```{r}
+#use 70% data for training and other 30% for testing     
+# get the number 70/30 training test split   
+numberOfTrainingSamples <- round(length(FOX.RF.df$FOX) * .7)      
+# training data   
+set.seed(1234)   
+trainFOXRF <- FOX.RF.df[1:numberOfTrainingSamples,]  
+trainFOXRF_labels <- FOX.RF.df$FOX[1:numberOfTrainingSamples]     
+# testing data  
+set.seed(1234)  
+testFOXRF <- FOX.RF.df[-(1:numberOfTrainingSamples),]   
+testFOXRF_labels <-FOX.RF.df$FOX[-(1:numberOfTrainingSamples)]     
+remove(numberOfTrainingSamples)
+```
+
+## Balancing FOX Levels
+
+##### Look at original training data distribution
+
+```{r}
+table(trainFOXRF$FOX)
+```
+
+##### Try oversampling
+
+```{r}
+#Oversample to balance all MIC categories  
+set.seed(1234)
+over.FOX.RF.df<- RandOverClassif(FOX~., trainFOXRF, "balance")  #"balance" tries to balance all existing classes    
+
+table(over.FOX.RF.df$FOX) #This oversamples other categories so that there are 886 rows (number of observations of majority category) for each
+```
+
+##### Try a mix of undersampling and oversampling
+
+```{r}
+#Undersample MIC category 4  
+set.seed(1234)
+C.perc= list("4"=0.20)  
+under_over.FOX.RF.df<- RandUnderClassif(FOX~., trainFOXRF, C.perc)   
+table(under_over.FOX.RF.df$FOX) #first undersample  
+
+#Oversample MIC category 16, 32
+set.seed(1234)
+C.perc= list("16"=10, "32"=14)  
+under_over.FOX.RF.df<- RandOverClassif(FOX~., under_over.FOX.RF.df, C.perc)   
+table(under_over.FOX.RF.df$FOX) #then oversample
+```
+
+## Random Forest:
+
+### Original
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)  
+RFFOX<-randomForest(FOX~Year+SOURCE+AMC+AXO+CHL+CIP+COT+GEN+NAL+TET+AMP+FIS, data=trainFOXRF, na.action=na.exclude, ntree=500, importance=TRUE)  
+RFFOX  
+#35% OOB estimate of error rate  
+#ntree=500  
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power  
+pre.or <- sort(RFFOX$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable 
+pre.or  
+remove(pre.or)   
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score  
+varImpPlot(RFFOX, main="")
+```
+
+-   Strongest predictors
+
+    -   ampicillin (penicillin)
+    -   amoxicillin-clavulanic acid (B-lactam)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+trainRFFOX_prediction<- predict(RFFOX,trainFOXRF)   
+trainconMatFOXRF<-confusionMatrix(trainRFFOX_prediction, trainFOXRF$FOX)
+trainconMatFOXRF$table  
+paste('Accuracy =', round(trainconMatFOXRF$overall["Accuracy"],2)) #returns accuracy
+trainconMatFOXRF$overall #also gives accuracy in output in scientific notation   #accuracy is now 75% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+testRFFOX_prediction<-predict(RFFOX,testFOXRF) 
+testConMatFOXRF<-confusionMatrix(testRFFOX_prediction,testFOXRF$FOX) 
+paste('Accuracy =', round(testConMatFOXRF$overall["Accuracy"],2)) #returns accuracy #accuracy is 64% on test data
+
+FOX_RF_ConMat<-testConMatFOXRF$table  #saves just the confusion matrix as an object for future analysis 
+
+testConMatFOXRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |            |
+|-----|------------|
+| 2   | 0.32628798 |
+| 4   | 0.90581854 |
+| 8   | 0.05988024 |
+| 16  | 0.12000000 |
+| 32  | 0.92307692 |
+
+##### Balanced Accuracy:
+
+```{r}
+FOX_RF_AccStats<-testConMatFOXRF$byClass      
+Balanced.Accuracy<-data.matrix(FOX_RF_AccStats[,"Balanced Accuracy"])     
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 2** | 0.6298107 |
+|  **Class: 4** | 0.5781957 |
+|  **Class: 8** | 0.5232405 |
+| **Class: 16** | 0.5598490 |
+| **Class: 32** | 0.9609344 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.9960370 |
+| 4   | 1.0000000 |
+| 8   | 0.9720559 |
+| 16  | 0.3200000 |
+| 32  | 0.9230769 |
+
+```{r}
+PlusorMinus1_overall(FOX_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(FOX_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(FOX_RF_ConMat, 16)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(FOX_RF_ConMat, 16)
+```
+
+### Mix of Under and Over
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)    
+RFFOX<-randomForest(FOX~Year+SOURCE+AMC+AXO+CHL+CIP+COT+GEN+NAL+TET+AMP+FIS, data=under_over.FOX.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)    
+RFFOX    
+#28% OOB estimate of error rate    
+#ntree=500    
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power    
+pre.or <- sort(RFFOX$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable   
+pre.or    
+remove(pre.or)    
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score    
+varImpPlot(RFFOX, main="")
+```
+
+-   Strongest predictors
+
+    -   year
+
+    -   Gentamycin (another FOXnoglycoside)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71) 
+trainRFFOX_prediction<- predict(RFFOX,under_over.FOX.RF.df)
+trainconMatFOXRF<-confusionMatrix(trainRFFOX_prediction, under_over.FOX.RF.df$FOX) 
+trainconMatFOXRF$table    
+trainconMatFOXRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 82% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71) 
+testRFFOX_prediction<-predict(RFFOX,testFOXRF)   
+testConMatFOXRF<-confusionMatrix(testRFFOX_prediction,testFOXRF$FOX)
+paste('Accuracy =', round(testConMatFOXRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 38% on test data     
+FOX_RF_ConMat<-testConMatFOXRF$table  #saves just the confusion matrix as an object for future analysis      
+testConMatFOXRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.8361955 |
+| 4   | 0.1528600 |
+| 8   | 0.5628743 |
+| 16  | 0.1600000 |
+| 32  | 0.8846154 |
+
+##### Balanced Accuracy:
+
+```{r}
+FOX_RF_AccStats<-testConMatFOXRF$byClass        
+Balanced.Accuracy<-data.matrix(FOX_RF_AccStats[,"Balanced Accuracy"]) 
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 2** | 0.7051133 |
+|  **Class: 4** | 0.5378509 |
+|  **Class: 8** | 0.6578476 |
+| **Class: 16** | 0.5556944 |
+| **Class: 32** | 0.9388344 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.8916777 |
+| 4   | 0.9393491 |
+| 8   | 0.7305389 |
+| 16  | 0.7600000 |
+| 32  | 0.9230769 |
+
+```{r}
+PlusorMinus1_overall(FOX_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(FOX_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(FOX_RF_ConMat, 16)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(FOX_RF_ConMat, 16)
+```
+
+### BEST MODEL: Oversampling
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)   
+final_RFFOX<-randomForest(FOX~Year+AMC+AXO+CHL+CIP+COT+GEN+NAL+TET+AMP+FIS, data=over.FOX.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)   
+final_RFFOX   
+#24.69% OOB estimate of error rate
+#ntree=500   
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power   
+pre.or <- sort(final_RFFOX$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable  
+pre.or   
+remove(pre.or)   
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score   
+varImpPlot(final_RFFOX, main="")
+```
+
+-   Strongest predictors
+
+    -   year
+
+    -   Gentamycin (aminoglycoside)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+final_trainRFFOX_prediction<- predict(final_RFFOX,over.FOX.RF.df)    
+final_trainconMatFOXRF<-confusionMatrix(final_trainRFFOX_prediction, over.FOX.RF.df$FOX)
+final_trainconMatFOXRF$table   
+ 
+final_trainconMatFOXRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 79% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+final_testRFFOX_prediction<-predict(final_RFFOX,testFOXRF)  
+final_testConMatFOXRF<-confusionMatrix(final_testRFFOX_prediction,testFOXRF$FOX)  
+paste('Accuracy =', round(final_testConMatFOXRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 45% on test data
+final_FOX_RF_ConMat<-final_testConMatFOXRF$table  #saves just the confusion matrix as an object for future analysis
+    
+final_testConMatFOXRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(final_FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.6565390 |
+| 4   | 0.3658777 |
+| 8   | 0.4730539 |
+| 16  | 0.2400000 |
+| 32  | 0.8461538 |
+
+##### Balanced Accuracy:
+
+```{r}
+FOX_RF_AccStats<-final_testConMatFOXRF$byClass       
+Balanced.Accuracy<-data.matrix(FOX_RF_AccStats[,"Balanced Accuracy"])      
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 2** | 0.6982307 |
+|  **Class: 4** | 0.5672017 |
+|  **Class: 8** | 0.6467879 |
+| **Class: 16** | 0.5694263 |
+| **Class: 32** | 0.9208117 |
+
+##### Plus or Minus One Accuracy by Category:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(final_FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.8678996 |
+| 4   | 0.8846154 |
+| 8   | 0.8702595 |
+| 16  | 0.7200000 |
+| 32  | 0.9230769 |
+
+##### Plus or Minus One Accuracy Overall:
+
+```{r}
+PlusorMinus1_overall(final_FOX_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_FOX_RF_ConMat, 16)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_FOX_RF_ConMat, 16)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(final_FOX_RF_ConMat, 16)
+```
+
+```{r}
+remove(RFFOX, trainconMatFOXRF, trainRFFOX_prediction, testRFFOX_prediction, testConMatFOXRF, FOX_RF_ConMat, C.perc, FOX_RF_AccStats, Balanced.Accuracy )
+
+remove(over.FOX.RF.df, under_over.FOX.RF.df, final_trainconMatFOXRF, final_trainRFFOX_prediction, trainFOXRF_labels)
+```

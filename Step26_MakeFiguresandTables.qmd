@@ -1,0 +1,221 @@
+### Make Variable Importance Plots that are used in Figure 1 of the Paper
+
+```{r}
+png('Variable_Importance_Plot_Figures/AMIVarImp.png')
+varImpPlot(final_RFAMI, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/AMPVarImp.png')
+varImpPlot(final_RFAMP, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/FOXVarImp.png')
+varImpPlot(final_RFFOX, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/TIOVarImp.png')
+varImpPlot(final_RFTIO, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/CHLVarImp.png')
+varImpPlot(final_RFCHL, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/CIPVarImp.png')
+varImpPlot(final_RFCIP, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/FISVarImp.png')
+varImpPlot(final_RFFIS, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/COTVarImp.png')
+varImpPlot(final_RFCOT, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/AMCVarImp.png')
+varImpPlot(final_RFAMC, main="")
+dev.off()
+```
+
+```{r}
+png('Variable_Importance_Plot_Figures/TETVarImp.png')
+varImpPlot(final_RFTET, main="")
+dev.off()
+```
+
+### Make Table 3: Accuracy of each model on validation datasets
+
+```{r}
+AM=c("AMC", 'AMI', "AMP", 'CHL', 'CIP','COT', 'FIS', 'FOX', 'TET', 'TIO')
+
+#make a list of exact accuracies on chicken validation data
+chicken_EA=c(noquote(paste(100*round(ChickenAMCConMatRF$overall["Accuracy"],2))),noquote(paste(100*round(ChickenAMIConMatRF$overall["Accuracy"],2))),noquote(paste(100*round(ChickenAMPConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenCHLConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenCIPConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenCOTConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenFISConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenFOXConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenTETConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(ChickenTIOConMatRF$overall["Accuracy"],2))))
+
+
+#make a list of exact accuracies on human validation data
+human_EA=c(noquote(paste(100*round(HumanAMCConMatRF$overall["Accuracy"],2))),noquote(paste(100*round(HumanAMIConMatRF$overall["Accuracy"],2))),noquote(paste(100*round(HumanAMPConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanCHLConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanCIPConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanCOTConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanFISConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanFOXConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanTETConMatRF$overall["Accuracy"],2))), noquote(paste(100*round(HumanTIOConMatRF$overall["Accuracy"],2))))
+
+#make a list of exact accuracies on test data
+test_EA=c(noquote(paste(100*round(final_testConMatAMCRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatAMIRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatAMPRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatCHLRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatCIPRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatCOTRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatFISRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatFOXRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatTETRF$overall["Accuracy"],2))), noquote(paste(100*round(final_testConMatTIORF$overall["Accuracy"],2))))
+```
+
+```{r}
+#Make a list of plus or minus 1 accuracy on test data
+test_PM1=c(round(table_PlusorMinus1_overall(final_AMC_RF_ConMat),0),round(table_PlusorMinus1_overall(final_AMI_RF_ConMat),0),round(table_PlusorMinus1_overall(final_AMP_RF_ConMat),0),round(table_PlusorMinus1_overall(final_CHL_RF_ConMat),0),round(table_PlusorMinus1_overall(final_CIP_RF_ConMat),0),round(table_PlusorMinus1_overall(final_COT_RF_ConMat),0),round(table_PlusorMinus1_overall(final_FIS_RF_ConMat),0),round(table_PlusorMinus1_overall(final_FOX_RF_ConMat),0),round(table_PlusorMinus1_overall(final_TET_RF_ConMat),0), round(table_PlusorMinus1_overall(final_TIO_RF_ConMat),0))
+
+#Make a list of plus or minus one accuracy on Chicken validation data
+chicken_PM1=c(round(table_PlusorMinus1_overall(AMC_Chicken_ConMat),0),round(table_PlusorMinus1_overall(AMI_Chicken_ConMat),0),round(table_PlusorMinus1_overall(AMP_Chicken_ConMat),0),round(table_PlusorMinus1_overall(CHL_Chicken_ConMat),0),round(table_PlusorMinus1_overall(CIP_Chicken_ConMat),0),round(table_PlusorMinus1_overall(COT_Chicken_ConMat),0),round(table_PlusorMinus1_overall(FIS_Chicken_ConMat),0),round(table_PlusorMinus1_overall(FOX_Chicken_ConMat),0),round(table_PlusorMinus1_overall(TET_Chicken_ConMat),0), round(table_PlusorMinus1_overall(TIO_Chicken_ConMat),0))
+
+#Make a list of plus or minus one accuracy on Human validation data
+Human_PM1=c(round(table_PlusorMinus1_overall(AMC_Human_ConMat),0),round(table_PlusorMinus1_overall(AMI_Human_ConMat),0),round(table_PlusorMinus1_overall(AMP_Human_ConMat),0),round(table_PlusorMinus1_overall(CHL_Human_ConMat),0),round(table_PlusorMinus1_overall(CIP_Human_ConMat),0),round(table_PlusorMinus1_overall(COT_Human_ConMat),0),round(table_PlusorMinus1_overall(FIS_Human_ConMat),0),round(table_PlusorMinus1_overall(FOX_Human_ConMat),0),round(table_PlusorMinus1_overall(TET_Human_ConMat),0), round(table_PlusorMinus1_overall(TIO_Human_ConMat),0))
+
+```
+
+```{r}
+table_3_df<- data.frame(AM, test_EA, test_PM1, chicken_EA, chicken_PM1, human_EA, Human_PM1)
+```
+
+```{r}
+table_3<-table_3_df |> 
+  gt() |> 
+  cols_label(
+    AM= "Antimicrobial",
+    test_EA = 'Exact Accuracy (%)',
+    test_PM1 = '+/- 1 Category accuracy (%)',
+    chicken_EA = 'Exact Accuracy (%)',
+    chicken_PM1 = '+/- 1 Category accuracy (%)',
+    human_EA= 'Exact Accuracy (%)',
+    Human_PM1= '+/- 1 Category accuracy (%)'
+  )|> 
+  tab_spanner(
+    label = md('**Cattle E. coli test data**'),
+    columns = 2:3
+  ) |> 
+  tab_spanner(
+    label = md('**External data: NARMS chicken E. coli**'),
+    columns = 4:5
+  ) |> 
+  tab_spanner(
+    label = md('**External data: NARMS human E. coli O157:H7 clinical cases**'),
+    columns = 6:7
+  )
+
+```
+
+### Make Table 4: **Sensitivity and error rates for each antimicrobial random forest model on test data**
+
+```{r}
+AM=c("AMC", "AMP", 'CHL', 'CIP','COT', 'FOX', 'TET', 'TIO')
+
+#make vector of NARMS resistant sensitivities
+NARMS_RS=c(table_resistant_sensitivity(final_AMC_RF_ConMat,16),table_resistant_sensitivity(final_AMP_RF_ConMat, 16), table_resistant_sensitivity(final_CHL_RF_ConMat,8), table_resistant_sensitivity(final_CIP_RF_ConMat, 0.06), table_resistant_sensitivity(final_COT_RF_ConMat,2), table_resistant_sensitivity(final_FOX_RF_ConMat,16), table_resistant_sensitivity(final_TET_RF_ConMat,4), table_resistant_sensitivity(final_TIO_RF_ConMat,4))
+
+#make vector of ECOFF resistant sensitivities
+ECOFF_RS=c(table_resistant_sensitivity(final_AMC_RF_ConMat,8),table_resistant_sensitivity(final_AMP_RF_ConMat, 8), table_resistant_sensitivity(final_CHL_RF_ConMat, 16), table_resistant_sensitivity(final_CIP_RF_ConMat, 0.06), table_resistant_sensitivity(final_COT_RF_ConMat,0.5), table_resistant_sensitivity(final_FOX_RF_ConMat,16), table_resistant_sensitivity(final_TET_RF_ConMat,8), table_resistant_sensitivity(final_TIO_RF_ConMat,1))
+
+#make vector of NARMS susceptible sensitivites
+NARMS_SS=c(table_susceptible_sensitivity(final_AMC_RF_ConMat,16),table_susceptible_sensitivity(final_AMP_RF_ConMat, 16), table_susceptible_sensitivity(final_CHL_RF_ConMat,8), table_susceptible_sensitivity(final_CIP_RF_ConMat, 0.06), table_susceptible_sensitivity(final_COT_RF_ConMat,2), table_susceptible_sensitivity(final_FOX_RF_ConMat,16), table_susceptible_sensitivity(final_TET_RF_ConMat,4), table_susceptible_sensitivity(final_TIO_RF_ConMat,4))
+
+#make vector of ECOFF susceptibible sensitivities
+ECOFF_SS=c(table_susceptible_sensitivity(final_AMC_RF_ConMat,8),table_susceptible_sensitivity(final_AMP_RF_ConMat, 8), table_susceptible_sensitivity(final_CHL_RF_ConMat,16), table_susceptible_sensitivity(final_CIP_RF_ConMat, 0.06), table_susceptible_sensitivity(final_COT_RF_ConMat,0.5), table_susceptible_sensitivity(final_FOX_RF_ConMat,16), table_susceptible_sensitivity(final_TET_RF_ConMat,8), table_susceptible_sensitivity(final_TIO_RF_ConMat,1))
+
+#make vector of Very Major Errors
+VME=c(table_VeryMajorError(final_AMC_RF_ConMat,16),table_VeryMajorError(final_AMP_RF_ConMat, 16), table_VeryMajorError(final_CHL_RF_ConMat,8), table_VeryMajorError(final_CIP_RF_ConMat, 0.06), table_VeryMajorError(final_COT_RF_ConMat,2), table_VeryMajorError(final_FOX_RF_ConMat,16), table_VeryMajorError(final_TET_RF_ConMat,4), table_VeryMajorError(final_TIO_RF_ConMat,4))
+
+ME=c(table_MajorError(final_AMC_RF_ConMat,16),table_MajorError(final_AMP_RF_ConMat, 16), table_MajorError(final_CHL_RF_ConMat,8), table_MajorError(final_CIP_RF_ConMat, 0.06), table_MajorError(final_COT_RF_ConMat,2), table_MajorError(final_FOX_RF_ConMat,16), table_MajorError(final_TET_RF_ConMat,4), table_MajorError(final_TIO_RF_ConMat,4))
+```
+
+```{r}
+table_4_df<- data.frame(AM, NARMS_RS, NARMS_SS, ECOFF_RS, ECOFF_SS, VME, ME)
+```
+
+```{r}
+table_4<-table_4_df |> 
+  gt() |> 
+  cols_label(
+    AM= "Antimicrobial",
+    NARMS_RS = 'NARMS resistant sensitivity (%)',
+    NARMS_SS = 'NARMS susceptible sensitivity (%)',
+    ECOFF_RS = 'ECOFF resistant sensitivity (%)',
+    ECOFF_SS = 'ECOFF susceptible sensitivity (%)',
+    VME= 'Very Major Error (%)',
+    ME= 'Major Error (%)'
+  )
+
+```
+
+### Provide information for Table 1: Number of cattle-associated E. coli isolates in each MIC category.
+
+```{r}
+sink(file="tables/table_1", append=TRUE)
+print("AMC")
+table(NARMSCattleCombined_ordinal$AMC)
+print("AMI")
+table(NARMSCattleCombined_ordinal$AMI)
+print("AMP")
+table(NARMSCattleCombined_ordinal$AMP)
+print("AXO")
+table(NARMSCattleCombined_ordinal$AXO)
+print("CHL")
+table(NARMSCattleCombined_ordinal$CHL)
+print("CIP")
+print("Please note that although the MIC categories display as 0.015, 0.06, and 0.125, they actually correspond to 0.015, 0.03-0.06, and 0.125 seen in Table 1 in the manuscript")
+table(NARMSCattleCombined_ordinal$CIP)
+print("COT")
+print("Please note that although the MIC categories display as 0.125, 0.5, 2, and 4, they actually correspond to 0.125, 0.25-0.5, 1-2, and 4 seen in Table 1 in the manuscript")
+table(NARMSCattleCombined_ordinal$COT)
+print("FIS")
+print("Please note that although the MIC categories display as 16, 32, 128, and 256 they actually correspond to 16, 32, 64-128, and 256 seen in Table 1 in the manuscript")
+table(NARMSCattleCombined_ordinal$FIS)
+print("FOX")
+table(NARMSCattleCombined_ordinal$FOX)
+print("GEN")
+table(NARMSCattleCombined_ordinal$GEN)
+print("KAN")
+table(NARMSCattleCombined_ordinal$KAN)
+print("NAL")
+print("Please note that although the MIC categories display as 1, 2, 8, 16, and 32, they actually correspond to 1, 2, 4-8, 16, and 32, seen in Table 1 in the manuscript")
+table(NARMSCattleCombined_ordinal$NAL)
+print("TET")
+table(NARMSCattleCombined_ordinal$TET)
+print("TIO")
+table(NARMSCattleCombined_ordinal$TIO)
+sink(file=NULL)
+
+```
+
+```{r}
+remove(AM, NARMS_RS, NARMS_SS, ECOFF_RS, ECOFF_SS, VME, ME, test_EA, test_PM1, chicken_EA, chicken_PM1, human_EA, Human_PM1)
+
+remove(final_testConMatAMCRF, final_testConMatAMIRF, final_testConMatAMPRF, final_testConMatCHLRF, final_testConMatCIPRF, final_testConMatCOTRF, final_testConMatFISRF, final_testConMatFOXRF, final_testConMatTETRF, final_testConMatTIORF)
+```
+
+### Export Tables 3 and 4 as .png files
+
+Please comment out the below code block if you do not have Google Chrome installed on your computer as the gtsave process requires Chrome to save a gttable as .png files. You may still view the information in Tables 3 and 4 in R studio by entering "View (table_3_df)" and "View (table_3_df)" in the console.
+
+```{r}
+#exports table to folder called Tables
+#exports table to folder called Tables
+gtsave(table_3, "table3.png", path = "tables")
+gtsave(table_4, "table4.png", path = "tables")
+
+
+```

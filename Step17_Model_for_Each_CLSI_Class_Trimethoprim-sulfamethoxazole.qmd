@@ -1,0 +1,604 @@
+---
+title: "Model_for_Each_CLSI_Class"
+format: html
+editor: visual
+---
+
+# Trimethoprim-sulfamethoxazole (COT)
+
+-   CLSI Class: folate pathway agonist
+
+    ## Filtering COT isolates
+
+    ##### Filtering COT isolates into a separate dataframe to build RF
+
+    ```{r}
+    COT.RF.df <- NARMSCattleCombined_ordinal
+
+    #checking if there are any NAs for AMI variable in this dataframe  
+    (sum(is.na(COT.RF.df[match("COT",names(NARMSCattleCombined_ordinal))]))/nrow(COT.RF.df)*100) #returns 0%  
+
+    ```
+
+    ##### Check dependent variable (what predicting) is a factor in dataframe
+
+    ```{r}
+    is.factor(COT.RF.df$COT) #returns true
+    ```
+
+    ##### Make all categorical variables in dataframe factors
+
+    ```{r}
+    CategoricalVar<-c("STATE", "Year", "Month", "RAISING_CLAIM", "COUNTRY_OF_ORIGIN", "SOURCE", "SOURCE_SPECIES_INFO", "BRAND", "BRAND_NAME", "dataset_source", "MEAT_TYPE", "HOST_SPECIES")  
+
+    COT.RF.df[CategoricalVar]<-lapply(COT.RF.df[CategoricalVar], factor) 
+
+    remove(CategoricalVar)  
+    #Resist.Genes variables (ex: Aminoglycoside.Resist.Genes), GENOTYPE were not included in model because majority of isolates do not have this information 
+    ```
+
+    ## Missing Data Analysis for Antimicrobials
+
+    ##### For each AM, what percentage of total number of isolates were tested against that AM
+
+    ```{r}
+    MissingDataAnalysis_AMs(COT.RF.df)
+    ```
+
+|         |                  |
+|---------|------------------|
+| **AMC** | **100.00000000** |
+| **AXO** | **100.00000000** |
+| **CHL** | **100.00000000** |
+| **CIP** | **100.00000000** |
+| COT     | 100.00000000     |
+| **FOX** | **100.00000000** |
+| **GEN** | **100.00000000** |
+| **NAL** | **100.00000000** |
+| **TET** | **100.00000000** |
+| **AMP** | **99.99146248**  |
+| Str     | 99.98292496      |
+| **FIS** | **94.86894903**  |
+| AZI     | 78.04149236      |
+| MER     | 51.72031077      |
+| TIO     | 48.27968923      |
+| KAN     | 32.20353453      |
+| AMI     | 21.95850764      |
+| CEP     | 5.13105097       |
+| SMX     | 5.13105097       |
+| ATM     | 0.05122513       |
+| CAZ     | 0.05122513       |
+| CTX     | 0.05122513       |
+| FEP     | 0.05122513       |
+| IMI     | 0.05122513       |
+| PTZ     | 0.05122513       |
+| APR     | 0.00000000       |
+| CLI     | 0.00000000       |
+| DAP     | 0.00000000       |
+| DOX     | 0.00000000       |
+| ERY     | 0.00000000       |
+| FFN     | 0.00000000       |
+| LIN     | 0.00000000       |
+| LZD     | 0.00000000       |
+| NIT     | 0.00000000       |
+| PEN     | 0.00000000       |
+| QDA     | 0.00000000       |
+| TEL     | 0.00000000       |
+| TGC     | 0.00000000       |
+| TYL     | 0.00000000       |
+| VAN     | 0.00000000       |
+
+10 predictor variables tested on \>90% isolates (not including Str because of protocol change in MIC measurement) and so can be used in model
+
+## Missing Data Analysis for Categorical Variables
+
+##### For each categorical variable, what percentage of total number of isolates were tested against that variable
+
+```{r}
+MissingDataAnalysis_CategoricalVar(COT.RF.df)
+```
+
+| **Variable Name** | **Percent_of_Isolates_Tested** |
+|:------------------|:-------------------------------|
+
+|                     |                |
+|---------------------|----------------|
+| **Year**            | **100.000000** |
+| **dataset_source**  | **100.000000** |
+| **SOURCE**          | **100.000000** |
+| **HOST_SPECIES**    | **100.000000** |
+| ACQUISITION_DATE    | 99.846325      |
+| Month               | 88.201144      |
+| SOURCE_SPECIES_INFO | 77.332878      |
+| STATE               | 39.084778      |
+| GROWTH              | 39.084778      |
+| MEAT_TYPE           | 39.084778      |
+| BRAND_NAME          | 36.062495      |
+| BRAND               | 35.652694      |
+| CUTS                | 20.037565      |
+| COUNTRY_OF_ORIGIN   | 11.585418      |
+| GENOTYPE            | 9.997439       |
+| RAISING_CLAIM       | 4.482199       |
+
+##### Checking Levels for Categorical Variables with 90% plus data:
+
+```{r}
+levels(COT.RF.df$Year)
+```
+
+```{r}
+levels(COT.RF.df$dataset_source)
+```
+
+```{r}
+levels(COT.RF.df$SOURCE)
+```
+
+```{r}
+levels(COT.RF.df$HOST_SPECIES)
+```
+
+Possible Categorical Variable Predictor Variables: (have enough data filled in and have unique levels)
+
+-   Year
+-   SOURCE
+
+## Create 70% Training 30% Testing Split
+
+```{r}
+#set a random seed and shuffle data frame to get random sample of data in both the testing and training set   
+set.seed(1234)   
+COT.RF.df<-COT.RF.df[sample(1:nrow(COT.RF.df)), ]
+```
+
+```{r}
+#use 70% data for training and other 30% for testing     
+# get the number 70/30 training test split   
+numberOfTrainingSamples <- round(length(COT.RF.df$COT) * .7)
+
+# training data   
+set.seed(1234)   
+trainCOTRF <- COT.RF.df[1:numberOfTrainingSamples,]  
+trainCOTRF_labels <- COT.RF.df$COT[1:numberOfTrainingSamples] 
+
+# testing data  
+set.seed(1234)  
+testCOTRF <- COT.RF.df[-(1:numberOfTrainingSamples),]   
+testCOTRF_labels <-COT.RF.df$COT[-(1:numberOfTrainingSamples)]
+
+remove(numberOfTrainingSamples)
+```
+
+## Balancing COT Levels
+
+##### Look at original training data distribution
+
+```{r}
+table(trainCOTRF$COT)
+```
+
+##### Try oversampling
+
+```{r}
+#Oversample to balance all MIC categories  
+set.seed(71)
+over.COT.RF.df<- RandOverClassif(COT~., trainCOTRF, "balance")  #"balance" tries to balance all existing classes    
+
+table(over.COT.RF.df$COT) #This oversamples other categories so that there are 7517 rows (number of observations of majority category) for each
+```
+
+##### Try a mix of undersampling and oversampling
+
+```{r}
+#Undersample MIC category 0.125 and 0.25 
+set.seed(71)
+C.perc= list("0.125"=0.07)  
+under_over.COT.RF.df<- RandUnderClassif(COT~., trainCOTRF, C.perc)   
+table(under_over.COT.RF.df$COT) #first undersample  
+
+#Oversample MIC category 1,2,4
+set.seed(71)
+C.perc= list("1"=9, "2"=28, "4"=6)  
+under_over.COT.RF.df<- RandOverClassif(COT~., under_over.COT.RF.df, C.perc)   
+table(under_over.COT.RF.df$COT) #then oversample
+```
+
+## Random Forest:
+
+### Original
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)  
+RFCOT<-randomForest(COT~Year+SOURCE+AXO+CHL+CIP+FIS+FOX+GEN+NAL+TET+Str, data=trainCOTRF, na.action=na.exclude, ntree=500, importance=TRUE)  
+RFCOT  
+#6% OOB estimate of error rate  
+#ntree=500  
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power  
+pre.or <- sort(RFCOT$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable 
+pre.or  
+remove(pre.or)   
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score  
+varImpPlot(RFCOT, main="")
+```
+
+-   Strongest predictors
+
+    -   SULFISOXAZOLE (another folate pathway agonist)
+
+##### Prediction on Training Data
+
+```{r}
+trainRFCOT_prediction<- predict(RFCOT,trainCOTRF)   
+trainconMatCOTRF<-confusionMatrix(trainRFCOT_prediction, trainCOTRF$COT)
+trainconMatCOTRF$table  
+paste('Accuracy =', round(trainconMatCOTRF$overall["Accuracy"],2)) #returns accuracy
+trainconMatCOTRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 97% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+testRFCOT_prediction<-predict(RFCOT,testCOTRF) 
+testConMatCOTRF<-confusionMatrix(testRFCOT_prediction,testCOTRF$COT) 
+paste('Accuracy =', round(testConMatCOTRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 94% on test data   
+
+COT_RF_ConMat<-testConMatCOTRF$table  #saves just the confusion matrix as an object for future analysis 
+#test_prediction_RFAMI<-data.frame(testRFAMI_prediction) %>%        
+  #mutate(actual_labels=testAMIRF$AMI)  #creates a dataframe called test_prediction_RFAMI that includes the predicted values and actual labels in two columns  
+
+testConMatCOTRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |            |
+|-------|------------|
+| 0.125 | 0.98104575 |
+| 0.25  | 0.52763819 |
+| 0.5   | 0.03225806 |
+| 1     | 0.00000000 |
+| 2     | 0.00000000 |
+| 4     | 0.22500000 |
+
+##### Balanced Accuracy:
+
+```{r}
+COT_RF_AccStats<-testConMatCOTRF$byClass      
+Balanced.Accuracy<-data.matrix(COT_RF_AccStats[,"Balanced Accuracy"])     
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|                  |           |
+|-----------------:|-----------|
+| **Class: 0.125** | 0.7775265 |
+|  **Class: 0.25** | 0.7488414 |
+|   **Class: 0.5** | 0.5156753 |
+|     **Class: 1** | 0.5000000 |
+|     **Class: 2** | 0.5000000 |
+|     **Class: 4** | 0.6117417 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.9996732 |
+| 0.25  | 0.9798995 |
+| 0.5   | 0.6774194 |
+| 1     | 0.0000000 |
+| 2     | 0.0000000 |
+| 4     | 0.2250000 |
+
+```{r}
+PlusorMinus1_overall(COT_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(COT_RF_ConMat,2)
+```
+
+##### ECOFF Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(COT_RF_ConMat,0.5)
+```
+
+##### Major and Minor Error:
+
+```{r}
+MajorandMinorError(COT_RF_ConMat,2)
+```
+
+### Mix of Under and Over
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)   
+RFCOT<-randomForest(COT~Year+SOURCE+AXO+CHL+CIP+FIS+FOX+GEN+NAL+TET+Str, data=under_over.COT.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)   
+RFCOT   
+#8% OOB estimate of error rate   
+#ntree=500   
+#mtry=3 (number of variables tried at each split) 
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power    
+pre.or <- sort(RFCOT$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable   
+pre.or    
+remove(pre.or)      
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score    
+varImpPlot(RFCOT, main="")
+```
+
+-   Strongest predictors
+
+    -   sulfioxazole (another folate pathway agonist)
+
+    -   year
+
+##### Prediction on Training Data
+
+```{r}
+trainRFCOT_prediction<- predict(RFCOT,under_over.COT.RF.df)
+trainconMatCOTRF<-confusionMatrix(trainRFCOT_prediction, under_over.COT.RF.df$COT) 
+trainconMatCOTRF$table   
+paste('Accuracy =', round(trainconMatCOTRF$overall["Accuracy"],2)) #returns accuracy 
+trainconMatCOTRF$overall #also gives accuracy in output in scientific notation   
+#accuracy is now 96% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+testRFCOT_prediction<-predict(RFCOT,testCOTRF)
+testConMatCOTRF<-confusionMatrix(testRFCOT_prediction,testCOTRF$COT)  
+paste('Accuracy =', round(testConMatCOTRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 89% on test data     
+COT_RF_ConMat<-testConMatCOTRF$table  #saves just the confusion matrix as an object for future analysis  
+   
+testConMatCOTRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.8738562 |
+| 0.25  | 0.4673367 |
+| 0.5   | 0.5806452 |
+| 1     | 0.1666667 |
+| 2     | 0.0000000 |
+| 4     | 0.4000000 |
+
+##### Balanced Accuracy:
+
+```{r}
+COT_RF_AccStats<-testConMatCOTRF$byClass       
+Balanced.Accuracy<-data.matrix(COT_RF_AccStats[,"Balanced Accuracy"])      
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|                  |           |
+|-----------------:|-----------|
+| **Class: 0.125** | 0.9170725 |
+|  **Class: 0.25** | 0.7027569 |
+|   **Class: 0.5** | 0.7693002 |
+|     **Class: 1** | 0.5666717 |
+|     **Class: 2** | 0.4974520 |
+|     **Class: 4** | 0.6904459 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.9326797 |
+| 0.25  | 0.8643216 |
+| 0.5   | 0.8387097 |
+| 1     | 0.1666667 |
+| 2     | 0.0000000 |
+| 4     | 0.4000000 |
+
+```{r}
+PlusorMinus1_overall(COT_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(COT_RF_ConMat,2)
+```
+
+##### ECOFF Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(COT_RF_ConMat,0.5)
+```
+
+##### Major and Minor Error:
+
+```{r}
+MajorandMinorError(COT_RF_ConMat,2)
+```
+
+### BEST MODEL: Oversampling to balance all categories
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)  
+final_RFCOT<-randomForest(COT~Year+AXO+CHL+CIP+FIS+FOX+GEN+NAL+TET, data=over.COT.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)  
+final_RFCOT  
+#6% OOB estimate of error rate  
+#ntree=500  
+#mtry=3 (number of variables tried at each split)
+```
+
+##### Tune Predictor Variables
+
+```{r}
+##check the order of the predictors in the model's prediction power  
+pre.or <- sort(final_RFCOT$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable 
+pre.or  
+remove(pre.or)   
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score  
+varImpPlot(final_RFCOT, main="")
+```
+
+-   Strongest predictors
+
+    -   sulfisoxazole (another folate pathway agonist)
+
+    -   year
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+final_trainRFCOT_prediction<- predict(final_RFCOT, over.COT.RF.df)   
+final_trainconMatCOTRF<-confusionMatrix(final_trainRFCOT_prediction, over.COT.RF.df$COT)
+final_trainconMatCOTRF$table  
+paste('Accuracy =', round(final_trainconMatCOTRF$overall["Accuracy"],2)) #returns accuracy
+final_trainconMatCOTRF$overall #also gives accuracy in output in scientific notation   #accuracy is now 95% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+final_testRFCOT_prediction<-predict(final_RFCOT,testCOTRF) 
+final_testConMatCOTRF<-confusionMatrix(final_testRFCOT_prediction,testCOTRF$COT) 
+paste('Accuracy =', round(final_testConMatCOTRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 90% on test data   
+
+final_COT_RF_ConMat<-final_testConMatCOTRF$table  #saves just the confusion matrix as an object for future analysis 
+
+final_testConMatCOTRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(final_COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.9209150 |
+| 0.5   | 0.8217391 |
+| 2     | 0.1428571 |
+| 4     | 0.2250000 |
+
+##### Balanced Accuracy:
+
+```{r}
+COT_RF_AccStats<-final_testConMatCOTRF$byClass      
+Balanced.Accuracy<-data.matrix(COT_RF_AccStats[,"Balanced Accuracy"])     
+View(Balanced.Accuracy)
+```
+
+| MIC Isolate Category | Balanced Accuracy |
+|:---------------------|:------------------|
+
+|                  |           |
+|-----------------:|-----------|
+| **Class: 0.125** | 0.9261615 |
+|   **Class: 0.5** | 0.8759484 |
+|     **Class: 2** | 0.5670742 |
+|     **Class: 4** | 0.6041591 |
+
+##### Plus or Minus One Accuracy by Category:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(final_COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.9826797 |
+| 0.5   | 0.8826087 |
+| 2     | 0.4285714 |
+| 4     | 0.2500000 |
+
+##### Plus or Minus One Accuracy Overall:
+
+```{r}
+PlusorMinus1_overall(final_COT_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(final_COT_RF_ConMat,2)
+```
+
+##### ECOFF Breakpoint Classification Accuracy
+
+```{r}
+BreakpointClassificationAccuracy(final_COT_RF_ConMat,0.5)
+```
+
+##### Major and Minor Error:
+
+```{r}
+MajorandMinorError(final_COT_RF_ConMat,2)
+```
+
+```{r}
+remove(RFCOT, trainconMatCOTRF, trainRFCOT_prediction, testRFCOT_prediction, testConMatCOTRF, COT_RF_ConMat, C.perc, COT_RF_AccStats, Balanced.Accuracy )
+
+remove(over.COT.RF.df, under_over.COT.RF.df, final_trainconMatCOTRF, final_trainRFCOT_prediction, trainCOTRF_labels)
+```

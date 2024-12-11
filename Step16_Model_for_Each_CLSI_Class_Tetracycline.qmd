@@ -1,0 +1,599 @@
+# Tetracycline (TET)
+
+-   CLSI Class: Tetracyclines
+
+## Filtering TET isolates
+
+##### Filtering TET isolates into a separate dataframe to build RF
+
+```{r}
+TET.RF.df <- NARMSCattleCombined_ordinal
+ 
+#checking if there are any NAs for AMI variable in this dataframe
+(sum(is.na(TET.RF.df[90]))/nrow(TET.RF.df)*100)
+#returns 0
+
+```
+
+##### Check dependent variable (what predicting) is a factor in dataframe
+
+```{r}
+is.factor(TET.RF.df$TET) #returns TRUE
+
+```
+
+##### Make all categorical variables in dataframe factors
+
+```{r}
+CategoricalVar<-c("STATE", "Year", "Month", "RAISING_CLAIM", "COUNTRY_OF_ORIGIN", "SOURCE", "SOURCE_SPECIES_INFO", "BRAND", "BRAND_NAME", "dataset_source", "HOST_SPECIES")
+
+TET.RF.df[CategoricalVar]<-lapply(TET.RF.df[CategoricalVar], factor)
+
+remove(CategoricalVar)
+#Resist.Genes variables (ex: Aminoglycoside.Resist.Genes), GENOTYPE were not included in model because majority of isolates do not have this information
+```
+
+## Missing Data Analysis for Antimicrobials
+
+##### For each AM, what percentage of total number of isolates were tested against that AM
+
+```{r}
+MissingDataAnalysis_AMs(TET.RF.df)
+```
+
+| **AM_Name** | **Percent_of_Isolates_Tested** |
+|:------------|:-------------------------------|
+
+|         |                  |
+|---------|------------------|
+| **AMC** | **100.00000000** |
+| **AXO** | **100.00000000** |
+| **CHL** | **100.00000000** |
+| **CIP** | **100.00000000** |
+| **COT** | **100.00000000** |
+| **FOX** | **100.00000000** |
+| **GEN** | **100.00000000** |
+| **NAL** | **100.00000000** |
+| TET     | 100.00000000     |
+| **AMP** | **99.99146248**  |
+| Str     | 99.98292496      |
+| **FIS** | **94.86894903**  |
+| AZI     | 78.04149236      |
+| MER     | 51.72031077      |
+| TIO     | 48.27968923      |
+| KAN     | 32.20353453      |
+| AMI     | 21.95850764      |
+| CEP     | 5.13105097       |
+| SMX     | 5.13105097       |
+| ATM     | 0.05122513       |
+| CAZ     | 0.05122513       |
+| CTX     | 0.05122513       |
+| FEP     | 0.05122513       |
+| IMI     | 0.05122513       |
+| PTZ     | 0.05122513       |
+| APR     | 0.00000000       |
+| CLI     | 0.00000000       |
+| DAP     | 0.00000000       |
+| DOX     | 0.00000000       |
+| ERY     | 0.00000000       |
+| FFN     | 0.00000000       |
+| LIN     | 0.00000000       |
+| LZD     | 0.00000000       |
+| NIT     | 0.00000000       |
+| PEN     | 0.00000000       |
+| QDA     | 0.00000000       |
+| TEL     | 0.00000000       |
+| TGC     | 0.00000000       |
+| TYL     | 0.00000000       |
+| VAN     | 0.00000000       |
+
+10 AM predictors are measured on 90% or greater of the isolates in the dataframe (not including Str because of protocol change in MIC measurement) and so will be used as possible predictor variables
+
+## Missing Data Analysis for Categorical Variables
+
+##### For each categorical variable, what percentage of total number of isolates were tested against that variable
+
+```{r}
+MissingDataAnalysis_CategoricalVar(TET.RF.df)
+```
+
+| **Variable Name** | **Percent_of_Isolates_Tested** |
+|:------------------|:-------------------------------|
+
+|                     |                |
+|---------------------|----------------|
+| **Year**            | **100.000000** |
+| **dataset_source**  | **100.000000** |
+| **SOURCE**          | **100.000000** |
+| **HOST_SPECIES**    | **100.000000** |
+| ACQUISITION_DATE    | 99.846325      |
+| Month               | 88.201144      |
+| SOURCE_SPECIES_INFO | 77.332878      |
+| STATE               | 39.084778      |
+| GROWTH              | 39.084778      |
+| MEAT_TYPE           | 39.084778      |
+| BRAND_NAME          | 36.062495      |
+| BRAND               | 35.652694      |
+| CUTS                | 20.037565      |
+| COUNTRY_OF_ORIGIN   | 11.585418      |
+| GENOTYPE            | 9.997439       |
+| RAISING_CLAIM       | 4.482199       |
+
+##### Checking Levels for Categorical Variables with 90% plus data:
+
+```{r}
+levels(TET.RF.df$Year)
+```
+
+```{r}
+levels(TET.RF.df$dataset_source)
+```
+
+```{r}
+levels(TET.RF.df$SOURCE)
+```
+
+```{r}
+levels(TET.RF.df$HOST_SPECIES)
+```
+
+Possible Categorical Variable Predictor Variables: (have enough data filled in and have unique levels)
+
+-   SOURCE
+
+-   Year
+
+## Create 70% Training and 30% Testing Data Split
+
+```{r}
+#set a random seed and shuffle data frame to get random sample of data in both the testing and training set 
+set.seed(1234) 
+TET.RF.df<-TET.RF.df[sample(1:nrow(TET.RF.df)), ]
+```
+
+```{r}
+#use 70% data for training and other 30% for testing  
+# get the number 70/30 training test split 
+numberOfTrainingSamples <- round(length(TET.RF.df$TET) * .7)
+
+# training data 
+set.seed(1234) 
+trainTETRF <- TET.RF.df[1:numberOfTrainingSamples,] 
+trainTETRF_labels <- TET.RF.df$TET[1:numberOfTrainingSamples]
+
+# testing data 
+set.seed(1234) 
+testTETRF <- TET.RF.df[-(1:numberOfTrainingSamples),] 
+testTETRF_labels <- TET.RF.df$TET[-(1:numberOfTrainingSamples)] 
+
+remove(numberOfTrainingSamples)
+```
+
+## Balancing TET Levels:
+
+##### Look at original training data distribution:
+
+```{r}
+table(trainTETRF$TET)
+```
+
+##### Try oversampling to balance all categories
+
+```{r}
+#Oversample to balance all MIC categories
+set.seed(71)
+over.TET.RF.df<- RandOverClassif(TET~., trainTETRF, "balance") #"balance" tries to balance all existing classes
+
+table(over.TET.RF.df$TET)
+#This oversamples 8, 16, 32 categories so that there are 8084 rows (number of observations of majority category) for each
+```
+
+##### Mix of oversampling and undersampling:
+
+```{r}
+#Undersample MIC category 4
+set.seed(71)
+C.perc= list("4"=0.4)
+under_over.TET.RF.df<- RandUnderClassif(TET~., trainTETRF, C.perc)
+
+table(under_over.TET.RF.df$TET) #first undersample 4
+
+#Oversample MIC category 8 and 16
+set.seed(71)
+C.perc= list("8"=6, "16"=10)
+under_over.TET.RF.df<- RandOverClassif(TET~., under_over.TET.RF.df, C.perc )
+
+table(under_over.TET.RF.df$TET) #then oversample 8 and 16
+```
+
+## Random Forest:
+
+### Original:
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)
+RFTET<-randomForest(TET~Year+SOURCE+AMC+AXO+CHL+CIP+COT+FOX+GEN+NAL+AMP+FIS, data=trainTETRF, na.action=na.exclude, ntree=500, importance=TRUE)
+RFTET
+#19.46% OOB estimate of error rate
+#ntree=500 (increasing ntree to 1000 doesn't change accuracy)
+#mtry=3 (number of variables tried at each split) (increasing mtry to 5, OOB=19%)
+
+```
+
+##### Tune Predictor Variables:
+
+```{r}
+##check the order of the predictors in the model's prediction power
+pre.or <- sort(RFTET$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable
+pre.or
+remove(pre.or)
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score
+varImpPlot(RFTET, main="")
+```
+
+-   Strongest predictors
+
+    -   Sulfisoxazole (folate pathway agonist)
+
+    -   Ampicillin (Penicillin)
+
+##### Prediction on Training Data
+
+```{r}
+trainRFTET_prediction<- predict(RFTET,trainTETRF) 
+trainconMatTETRF<-confusionMatrix(trainRFTET_prediction, trainTETRF$TET) 
+trainconMatTETRF$table 
+paste('Accuracy =', round(trainconMatTETRF$overall["Accuracy"],2)) #returns accuracy 
+trainconMatTETRF$overall #also gives accuracy in output in scientific notation 
+#accuracy is now 84% on training data!
+```
+
+##### Prediction on Test Data:
+
+```{r}
+testRFTET_prediction<-predict(RFTET,testTETRF) 
+testConMatTETRF<-confusionMatrix(testRFTET_prediction,testTETRF$TET) 
+paste('Accuracy =', round(testConMatTETRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 81% on test data 
+TET_RF_ConMat<-testConMatTETRF$table #saves just the confusion matrix as an object for future analysis 
+
+testConMatTETRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 4   | 0.9809028 |
+| 8   | 0.0000000 |
+| 16  | 0.0000000 |
+| 32  | 0.5185185 |
+
+##### Balanced Accuracy:
+
+```{r}
+TET_RF_AccStats<-testConMatTETRF$byClass  
+Balanced.Accuracy<-data.matrix(TET_RF_AccStats[,"Balanced Accuracy"]) 
+View(Balanced.Accuracy)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 4** | 0.7063275 |
+|  **Class: 8** | 0.5000000 |
+| **Class: 16** | 0.5000000 |
+| **Class: 32** | 0.7480593 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |            |
+|-----|------------|
+| 4   | 0.98090278 |
+| 8   | 0.95275591 |
+| 16  | 0.08695652 |
+| 32  | 0.51851852 |
+
+```{r}
+PlusorMinus1_overall(TET_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(TET_RF_ConMat, 4)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(TET_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(TET_RF_ConMat, 4)
+```
+
+### Oversampling to balance all:
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)
+RFTET<-randomForest(TET~Year+SOURCE+AMC+AXO+CHL+CIP+COT+FOX+GEN+NAL+AMP+FIS, data=over.TET.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)
+RFTET
+#22% OOB estimate of error rate
+#ntree=500 (increasing ntree to 1000 doesn't change accuracy)
+#mtry=3 (number of variables tried at each split) 
+
+```
+
+##### Tune Predictor Variables:
+
+```{r}
+##check the order of the predictors in the model's prediction power 
+pre.or <- sort(RFTET$importance[,3], decreasing = TRUE) #adding [,3] gives the power with the title of the variable 
+pre.or 
+remove(pre.or) 
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score 
+varImpPlot(RFTET, main="")
+```
+
+-   Strongest predictors
+
+    -   Year?
+
+    -   Sulfisoxazole (folate pathway agonist)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+trainRFTET_prediction<- predict(RFTET,over.TET.RF.df)  
+trainconMatTETRF<-confusionMatrix(trainRFTET_prediction, over.TET.RF.df$TET)
+trainconMatTETRF$table  
+paste('Accuracy =', round(trainconMatTETRF$overall["Accuracy"],2)) #returns accuracy  
+trainconMatTETRF$overall #also gives accuracy in output in scientific notation  
+#accuracy is now 81% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+testRFTET_prediction<-predict(RFTET,testTETRF)  
+testConMatTETRF<-confusionMatrix(testRFTET_prediction,testTETRF$TET)  
+paste('Accuracy =', round(testConMatTETRF$overall["Accuracy"],2)) #returns accuracy  
+#accuracy is 59% on test data  
+TET_RF_ConMat<-testConMatTETRF$table
+#TET_RF_ConMat
+testConMatTETRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |            |
+|-----|------------|
+| 4   | 0.64756944 |
+| 8   | 0.29133858 |
+| 16  | 0.08695652 |
+| 32  | 0.55555556 |
+
+##### Balanced Accuracy:
+
+```{r}
+TET_RF_AccStats<-testConMatTETRF$byClass    
+Balanced.Accuracy<-data.matrix(TET_RF_AccStats[,"Balanced Accuracy"])  
+View(Balanced.Accuracy)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 4** | 0.6664759 |
+|  **Class: 8** | 0.5599995 |
+| **Class: 16** | 0.4951306 |
+| **Class: 32** | 0.7485778 |
+
+##### Plus or Minus One Accuracy:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 4   | 0.8402778 |
+| 8   | 0.9212598 |
+| 16  | 0.5217391 |
+| 32  | 0.6308244 |
+
+```{r}
+PlusorMinus1_overall(TET_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(TET_RF_ConMat, 4)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(TET_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(TET_RF_ConMat, 4)
+```
+
+### BEST MODEL: Mix of oversampling and undersampling:
+
+##### Build RF using Training Data:
+
+```{r}
+set.seed(71)  
+final_RFTET<-randomForest(TET~Year+AMC+AXO+CHL+CIP+COT+FOX+GEN+NAL+AMP+FIS, data= under_over.TET.RF.df, na.action=na.exclude, ntree=500, importance=TRUE)  
+final_RFTET  
+#32% OOB estimate of error rate  
+#ntree=500 (increasing ntree to 1000 doesn't change accuracy)  
+#mtry=3 (number of variables tried at each split)  
+```
+
+##### Tune Predictor Variables:
+
+```{r}
+##check the order of the predictors in the model's prediction power 
+pre.or <- sort(final_RFTET$importance[,3], decreasing = TRUE)  #adding [,3] gives the power with the title of the variable   
+pre.or   
+remove(pre.or)   
+
+#return a plot showing the importance of a predictor to the model by accuracy and Gini score   
+varImpPlot(final_RFTET, main="")
+```
+
+-   Strongest predictors
+
+    year
+
+    Sulfisoxazole (folate pathway inhibitor)
+
+##### Prediction on Training Data
+
+```{r}
+set.seed(71)
+final_trainRFTET_prediction<- predict(final_RFTET,under_over.TET.RF.df)    
+final_trainconMatTETRF<-confusionMatrix(final_trainRFTET_prediction, under_over.TET.RF.df$TET)
+final_trainconMatTETRF$table    
+paste('Accuracy =', round(final_trainconMatTETRF$overall["Accuracy"],2)) #returns accuracy    
+final_trainconMatTETRF$overall #also gives accuracy in output in scientific notation    
+#accuracy is now 74% on training data
+```
+
+##### Prediction on Test Data:
+
+```{r}
+set.seed(71)
+final_testRFTET_prediction<-predict(final_RFTET,testTETRF)    
+final_testConMatTETRF<-confusionMatrix(final_testRFTET_prediction,testTETRF$TET)    
+paste('Accuracy =', round(final_testConMatTETRF$overall["Accuracy"],2)) #returns accuracy
+#accuracy is 65% on test data    
+final_TET_RF_ConMat<-final_testConMatTETRF$table #saves just the confusion matrix as an object for future analysis    
+
+final_testConMatTETRF
+```
+
+##### Exact Accuracy:
+
+```{r}
+ConMat_Accuracy(final_TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |            |
+|-----|------------|
+| 4   | 0.72743056 |
+| 8   | 0.24409449 |
+| 16  | 0.04347826 |
+| 32  | 0.54838710 |
+
+##### Balanced Accuracy:
+
+```{r}
+TET_RF_AccStats<-final_testConMatTETRF$byClass      
+Balanced.Accuracy<-data.matrix(TET_RF_AccStats[,"Balanced Accuracy"])   
+View(Balanced.Accuracy)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|               |           |
+|--------------:|-----------|
+|  **Class: 4** | 0.6759128 |
+|  **Class: 8** | 0.5502404 |
+| **Class: 16** | 0.4920574 |
+| **Class: 32** | 0.7491935 |
+
+##### Plus or Minus One Accuracy by Category:
+
+```{r}
+PlusorMinus1_ConMat_Accuracy(final_TET_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 4   | 0.8932292 |
+| 8   | 0.9291339 |
+| 16  | 0.4202899 |
+| 32  | 0.6033453 |
+
+##### Plus or Minus One Accuracy Overall:
+
+```{r}
+PlusorMinus1_overall(final_TET_RF_ConMat)
+```
+
+##### NARMS Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_TET_RF_ConMat, 4)
+```
+
+##### ECOFF Breakpoint Classification Accuracy:
+
+```{r}
+BreakpointClassificationAccuracy(final_TET_RF_ConMat, 8)
+```
+
+##### Major and Minor Error
+
+```{r}
+MajorandMinorError(final_TET_RF_ConMat, 4)
+```
+
+```{r}
+remove(RFTET, trainconMatTETRF, trainRFTET_prediction, testRFTET_prediction, testConMatTETRF, TET_RF_ConMat, C.perc, TET_RF_AccStats, Balanced.Accuracy )
+
+remove(over.TET.RF.df, under_over.TET.RF.df, final_trainconMatTETRF, final_trainRFTET_prediction, trainTETRF_labels)
+```

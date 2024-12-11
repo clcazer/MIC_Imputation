@@ -1,0 +1,474 @@
+---
+title: "RF Validation on Chicken Data"
+format: html
+editor: visual
+---
+
+### RFAMC Prediction on Chicken Data
+
+```{r}
+AMC.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for AMC variable in this dataframe  
+(sum(is.na(AMC.Chicken.df[match("AMC",names(AMC.Chicken.df))]))/nrow(AMC.Chicken.df)*100) #returns 0%
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainAMCRF$Year) #2002-2019
+```
+
+```{r}
+table(AMC.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+AMC.Chicken.df$Year<- as.factor(AMC.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenAMC_prediction<-predict(final_RFAMC,AMC.Chicken.df) 
+ChickenAMCConMatRF<-confusionMatrix(ChickenAMC_prediction,AMC.Chicken.df$AMC) 
+paste('Accuracy =', round(ChickenAMCConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 58% on chicken data   
+
+AMC_Chicken_ConMat<-ChickenAMCConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenAMCConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(AMC_Chicken_ConMat)
+```
+
+### RFAMI Prediction on Chicken Data
+
+```{r}
+AMI.Chicken.df<- NARMSChickenCombined_ordinal%>%
+  filter(NARMSChickenCombined_ordinal$Year>2003) #filter out data from 2002-2003 because MIC concentrations tested were different and we wouldn't be able to verify their accuracy
+
+#checking if there are any NAs for AMI variable in this dataframe  
+(sum(is.na(AMI.Chicken.df[match("AMI",names(AMI.Chicken.df))]))/nrow(AMI.Chicken.df)*100) #returns 62.54  
+
+#further filter dataframe to only include isolates with AMI data 
+AMI.Chicken.df <- AMI.Chicken.df %>%      
+  filter(!is.na(AMI))    
+
+#checking again to see if there are any NAs for AMI in dataframe  
+(sum(is.na(AMI.Chicken.df[match("AMI",names(AMI.Chicken.df))]))/nrow(AMI.Chicken.df)*100) #returns 0, so no missing values now
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+#levels for year in training data
+table(trainAMIRF$Year)
+```
+
+```{r}
+#levels for year currently in external data (chicken)
+table(AMI.Chicken.df$Year) #years match
+```
+
+```{r}
+AMI.Chicken.df$Year<- as.factor(AMI.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenAMI_prediction<-predict(final_RFAMI,AMI.Chicken.df) 
+ChickenAMIConMatRF<-confusionMatrix(ChickenAMI_prediction,AMI.Chicken.df$AMI) 
+paste('Accuracy =', round(ChickenAMIConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 34% on chicken data   
+
+AMI_Chicken_ConMat<-ChickenAMIConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenAMIConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(AMI_Chicken_ConMat)
+```
+
+### RFAMP Prediction on Chicken Data
+
+```{r}
+AMP.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for AMP variable in this dataframe  
+(sum(is.na(AMP.Chicken.df[match("AMP",names(AMP.Chicken.df))]))/nrow(AMP.Chicken.df)*100) #returns ~0.0137%  
+
+#further filter dataframe to only include isolates with AMP data 
+AMP.Chicken.df <- AMP.Chicken.df %>%      
+  filter(!is.na(AMP))    
+
+#checking again to see if there are any NAs for AMP in dataframe  
+(sum(is.na(AMP.Chicken.df[match("AMP",names(AMP.Chicken.df))]))/nrow(AMP.Chicken.df)*100) #returns 0, so no missing values now
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainAMPRF$Year) #2002-2019
+```
+
+```{r}
+table(AMP.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+AMP.Chicken.df$Year<- as.factor(AMP.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenAMP_prediction<-predict(final_RFAMP,AMP.Chicken.df) 
+ChickenAMPConMatRF<-confusionMatrix(ChickenAMP_prediction,AMP.Chicken.df$AMP) 
+paste('Accuracy =', round(ChickenAMPConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 39% on chicken data   
+
+AMP_Chicken_ConMat<-ChickenAMPConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenAMPConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(AMP_Chicken_ConMat)
+```
+
+### RF CHL Prediction on Chicken Data
+
+```{r}
+CHL.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for CHL variable in this dataframe  
+(sum(is.na(CHL.Chicken.df[match("CHL",names(CHL.Chicken.df))]))/nrow(CHL.Chicken.df)*100) #returns 8.52%  
+
+#further filter dataframe to only include isolates with CHL data 
+CHL.Chicken.df <- CHL.Chicken.df %>%      
+  filter(!is.na(CHL))    
+
+#checking again to see if there are any NAs for CHL in dataframe  
+(sum(is.na(CHL.Chicken.df[match("CHL",names(CHL.Chicken.df))]))/nrow(CHL.Chicken.df)*100) #returns 0, so no missing values now
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainCHLRF$Year) #2002-2019
+```
+
+```{r}
+table(CHL.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+CHL.Chicken.df$Year<- as.factor(CHL.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenCHL_prediction<-predict(final_RFCHL,CHL.Chicken.df) 
+ChickenCHLConMatRF<-confusionMatrix(ChickenCHL_prediction,CHL.Chicken.df$CHL) 
+paste('Accuracy =', round(ChickenCHLConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 34% on chicken data   
+
+CHL_Chicken_ConMat<-ChickenCHLConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenCHLConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(CHL_Chicken_ConMat)
+```
+
+### RF CIP Prediction on Chicken Data
+
+```{r}
+CIP.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for CIP variable in this dataframe  
+(sum(is.na(CIP.Chicken.df[match("CIP",names(CIP.Chicken.df))]))/nrow(CIP.Chicken.df)*100) #returns 0%
+
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainCIPRF$Year) #2002-2019
+```
+
+```{r}
+table(CIP.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+CIP.Chicken.df$Year<- as.factor(CIP.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenCIP_prediction<-predict(final_RFCIP,CIP.Chicken.df) 
+ChickenCIPConMatRF<-confusionMatrix(ChickenCIP_prediction,CIP.Chicken.df$CIP) 
+paste('Accuracy =', round(ChickenCIPConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 77% on chicken data   
+
+CIP_Chicken_ConMat<-ChickenCIPConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenCIPConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(CIP_Chicken_ConMat)
+```
+
+### RF COT Prediction on chicken data:
+
+```{r}
+COT.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for COT variable in this dataframe  
+(sum(is.na(COT.Chicken.df[match("COT",names(COT.Chicken.df))]))/nrow(COT.Chicken.df)*100) #returns 0%
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainCOTRF$Year) #2002-2019
+```
+
+```{r}
+table(COT.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+COT.Chicken.df$Year<- as.factor(COT.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenCOT_prediction<-predict(final_RFCOT,COT.Chicken.df) 
+ChickenCOTConMatRF<-confusionMatrix(ChickenCOT_prediction,COT.Chicken.df$COT) 
+paste('Accuracy =', round(ChickenCOTConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 68% on chicken data   
+
+COT_Chicken_ConMat<-ChickenCOTConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenCOTConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(COT_Chicken_ConMat)
+```
+
+### RF FIS Prediction on chicken data:
+
+```{r}
+FIS.Chicken.df<- NARMSChickenCombined_ordinal
+
+#checking if there are any NAs for FIS variable in this dataframe  
+(sum(is.na(FIS.Chicken.df[match("FIS",names(FIS.Chicken.df))]))/nrow(FIS.Chicken.df)*100) #returns 8.52%  
+
+#further filter dataframe to only include isolates with FIS data 
+FIS.Chicken.df <- FIS.Chicken.df %>%      
+  filter(!is.na(FIS))    
+
+#checking again to see if there are any NAs for FIS in dataframe  
+(sum(is.na(FIS.Chicken.df[match("FIS",names(FIS.Chicken.df))]))/nrow(FIS.Chicken.df)*100) #returns 0, so no missing values now
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainFISRF$Year) #2004-2019
+```
+
+```{r}
+table(FIS.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+FIS.Chicken.df$Year<- as.factor(FIS.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenFIS_prediction<-predict(final_RFFIS,FIS.Chicken.df) 
+ChickenFISConMatRF<-confusionMatrix(ChickenFIS_prediction,FIS.Chicken.df$FIS) 
+paste('Accuracy =', round(ChickenFISConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 54% on chicken data   
+
+FIS_Chicken_ConMat<-ChickenFISConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenFISConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(FIS_Chicken_ConMat)
+```
+
+### RF FOX Prediction on Chicken Data:
+
+```{r}
+FOX.Chicken.df<- NARMSChickenCombined_ordinal  
+
+#checking if there are any NAs for FOX variable in this dataframe   
+(sum(is.na(FOX.Chicken.df[match("FOX",names(FOX.Chicken.df))]))/nrow(FOX.Chicken.df)*100) #returns 0%
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainFOXRF$Year) #2002-2019
+```
+
+```{r}
+table(FOX.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+FOX.Chicken.df$Year<- as.factor(FOX.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenFOX_prediction<-predict(final_RFFOX,FOX.Chicken.df) 
+ChickenFOXConMatRF<-confusionMatrix(ChickenFOX_prediction,FOX.Chicken.df$FOX) 
+paste('Accuracy =', round(ChickenFOXConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 48% on chicken data   
+
+FOX_Chicken_ConMat<-ChickenFOXConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenFOXConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(FOX_Chicken_ConMat)
+```
+
+### RF TET Prediction on Chicken Data:
+
+```{r}
+TET.Chicken.df<- NARMSChickenCombined_ordinal  
+
+#checking if there are any NAs for TET variable in this dataframe   
+(sum(is.na(TET.Chicken.df[match("TET",names(TET.Chicken.df))]))/nrow(TET.Chicken.df)*100) #returns 0%
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainTETRF$Year) #2002-2019
+```
+
+```{r}
+table(TET.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+TET.Chicken.df$Year<- as.factor(TET.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenTET_prediction<-predict(final_RFTET,TET.Chicken.df) 
+ChickenTETConMatRF<-confusionMatrix(ChickenTET_prediction,TET.Chicken.df$TET) 
+paste('Accuracy =', round(ChickenTETConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 59% on test data   
+
+TET_Chicken_ConMat<-ChickenTETConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenTETConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(TET_Chicken_ConMat)
+```
+
+### RF TIO Prediction on Chicken Data:
+
+```{r}
+TIO.Chicken.df<- NARMSChickenCombined_ordinal  
+
+#checking if there are any NAs for TIO variable in this dataframe   
+(sum(is.na(TIO.Chicken.df[match("TIO",names(TIO.Chicken.df))]))/nrow(TIO.Chicken.df)*100) #returns 29.87603%
+
+#further filter dataframe to only include isolates with TIO data 
+TIO.Chicken.df <- TIO.Chicken.df %>%      
+  filter(!is.na(TIO))    
+
+#checking again to see if there are any NAs for TIO in dataframe  
+(sum(is.na(TIO.Chicken.df[match("TIO",names(TIO.Chicken.df))]))/nrow(TIO.Chicken.df)*100) #returns 0, so no missing values now
+```
+
+##### Match external data (chicken)'s predictor variable structure to training data
+
+```{r}
+table(trainTIORF$Year) #2002-2015
+```
+
+```{r}
+table(TIO.Chicken.df$Year) #matches year range in training data
+```
+
+```{r}
+TIO.Chicken.df$Year<- as.factor(TIO.Chicken.df$Year) #make year a factor to match data structure in training dataframe
+```
+
+##### **Prediction on Chicken Data**
+
+```{r}
+set.seed(71)
+ChickenTIO_prediction<-predict(final_RFTIO,TIO.Chicken.df) 
+ChickenTIOConMatRF<-confusionMatrix(ChickenTIO_prediction,TIO.Chicken.df$TIO) 
+paste('Accuracy =', round(ChickenTIOConMatRF$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 54% on test data   
+
+TIO_Chicken_ConMat<-ChickenTIOConMatRF$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenTIOConMatRF
+```
+
+```{r}
+PlusorMinus1_overall(TIO_Chicken_ConMat)
+```
+
+Below is a test to see if RF prediction works if external dataframe has a different number of columns than training dataframe, but still has all predictor variables
+
+```{r}
+TIO.Chicken.df_test<- TIO.Chicken.df%>%
+  select(Year, AXO, CIP, FOX, NAL, AMC, CHL, COT, GEN, TET, AMP, TIO)
+
+```
+
+```{r}
+set.seed(71)
+ChickenTIO_prediction_test<-predict(final_RFTIO,TIO.Chicken.df_test) 
+ChickenTIOConMatRF_test<-confusionMatrix(ChickenTIO_prediction_test,TIO.Chicken.df_test$TIO) 
+paste('Accuracy =', round(ChickenTIOConMatRF_test$overall["Accuracy"],2)) #returns accuracy 
+#accuracy is 54% on test data   
+
+TIO_Chicken_ConMat_test<-ChickenTIOConMatRF_test$table  #saves just the confusion matrix as an object for future analysis 
+
+ChickenTIOConMatRF_test
+```

@@ -1,0 +1,621 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+##### create df
+
+```{r}
+Human_clinical_cleaned<-Human_clinical
+```
+
+### TET
+
+##### Initial TET MIC Values
+
+```{r}
+table(Human_clinical$TET.Rslt, Human_clinical$TET.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("TET.Rslt",names(Human_clinical_cleaned)) #gives column number of TET
+  col.number.sign<-match("TET.Rslt",names(Human_clinical_cleaned))-1 #gives column number of TET. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="8"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]==">") {
+    #print("> sign") #if the sign is >
+    if (Human_clinical_cleaned[x,col.number]=="16"){
+      #print("and equals 16") #and if the value is 16
+      Human_clinical_cleaned[x,col.number]<-NA #make NA because the MIC value cannot be resolved
+    } else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MIC Values:
+
+```{r}
+table(Human_clinical_cleaned$TET.Rslt, Human_clinical_cleaned$TET.Equiv)
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$TET)
+table(Human_clinical_cleaned$TET.Rslt)
+
+#lumb category 64 isolates into >= 32 category
+Human_clinical_cleaned$TET.Rslt[Human_clinical_cleaned$TET.Rslt==64]<- 32  
+table(Human_clinical_cleaned$TET.Rslt)
+```
+
+### NAL
+
+##### Initial NAL MIC Values
+
+```{r}
+table(Human_clinical$NAL.Rslt, Human_clinical$NAL.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("NAL.Rslt",names(Human_clinical_cleaned)) #gives column number of NAL
+  col.number.sign<-match("NAL.Rslt",names(Human_clinical_cleaned))-1 #gives column number of NAL. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="4"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$NAL.Rslt, Human_clinical_cleaned$NAL.Equiv)
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$NAL) 
+table(Human_clinical_cleaned$NAL.Rslt)  
+
+#lumb category 64, 128, 256 isolates into >= 32 category 
+Human_clinical_cleaned$NAL.Rslt[Human_clinical_cleaned$NAL.Rslt==64]<- 32
+Human_clinical_cleaned$NAL.Rslt[Human_clinical_cleaned$NAL.Rslt==128]<- 32
+Human_clinical_cleaned$NAL.Rslt[Human_clinical_cleaned$NAL.Rslt==256]<- 32
+table(Human_clinical_cleaned$NAL.Rslt)
+```
+
+### CIP
+
+##### Initial CIP MIC Values
+
+```{r}
+table(Human_clinical$CIP.Rslt, Human_clinical$CIP.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("CIP.Rslt",names(Human_clinical_cleaned)) #gives column number of CIP
+  col.number.sign<-match("CIP.Rslt",names(Human_clinical_cleaned))-1 #gives column number of CIP. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="0.03"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  } else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$CIP.Rslt, Human_clinical_cleaned$CIP.Equiv)
+```
+
+### CHL
+
+##### Initial CHL MIC Values
+
+```{r}
+table(Human_clinical$CHL.Rslt, Human_clinical$CHL.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("CHL.Rslt",names(Human_clinical_cleaned)) #gives column number of CHL
+  col.number.sign<-match("CHL.Rslt",names(Human_clinical_cleaned))-1 #gives column number of CHL. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="4"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  } else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$CHL.Rslt, Human_clinical_cleaned$CHL.Equiv)
+```
+
+### AMP
+
+##### Initial AMP MIC Values
+
+```{r}
+table(Human_clinical$AMP.Rslt, Human_clinical$AMP.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("AMP.Rslt",names(Human_clinical_cleaned)) #gives column number of AMP
+  col.number.sign<-match("AMP.Rslt",names(Human_clinical_cleaned))-1 #gives column number of AMP. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="2"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$AMP.Rslt, Human_clinical_cleaned$AMP.Equiv)
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$AMP) 
+table(Human_clinical_cleaned$AMP.Rslt)  
+
+#lumb category 64 isolates into >= 32 category 
+Human_clinical_cleaned$AMP.Rslt[Human_clinical_cleaned$AMP.Rslt==64]<- 32   
+table(Human_clinical_cleaned$AMP.Rslt)
+```
+
+### AZI (Called AZM in Human Dataframe by CDC)
+
+##### Initial AZI MIC Values
+
+```{r}
+table(Human_clinical$AZM.Rslt, Human_clinical$AZM.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("AZM.Rslt",names(Human_clinical_cleaned)) #gives column number of AZM
+  col.number.sign<-match("AZM.Rslt",names(Human_clinical_cleaned))-1 #gives column number of AZM. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]==">"){
+    if (Human_clinical_cleaned[x, col.number]=="16"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  } else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$AZM.Rslt, Human_clinical_cleaned$AZM.Equiv)
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$AZI) 
+table(Human_clinical_cleaned$AZM.Rslt)  
+
+#lumb category 64 isolates into >= 32 category 
+Human_clinical_cleaned$AZM.Rslt[Human_clinical_cleaned$AZM.Rslt==64]<- 32   
+table(Human_clinical_cleaned$AZM.Rslt)
+```
+
+### COT
+
+##### Initial COT MIC Values
+
+```{r}
+table(Human_clinical$COT.Rslt, Human_clinical$COT.Equiv)
+```
+
+##### Resolve Signs
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$COT.Rslt)  
+Human_clinical_cleaned$COT.Rslt[Human_clinical_cleaned$COT.Rslt==0.12]<- 0.125  
+table(Human_clinical_cleaned$COT.Rslt) #put MIC 0.12 isolate into 0.125
+```
+
+### FIS
+
+##### Initial FIS MIC Values:
+
+```{r}
+table(Human_clinical$FIS.Rslt, Human_clinical$FIS.Equiv) #no unresolved MICs
+```
+
+### AXO
+
+##### Initial FIS MIC Values:
+
+```{r}
+table(Human_clinical$AXO.Rslt, Human_clinical$AXO.Equiv) #no unresolved MICs
+```
+
+### TIO
+
+##### Initial TIO MIC Values
+
+```{r}
+table(Human_clinical$TIO.Rslt, Human_clinical$TIO.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("TIO.Rslt",names(Human_clinical_cleaned)) #gives column number of TIO
+  col.number.sign<-match("TIO.Rslt",names(Human_clinical_cleaned))-1 #gives column number of TIO. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="0.25"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+    else if (Human_clinical_cleaned[x, col.number]=="0.5"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$TIO.Rslt)
+Human_clinical_cleaned$TIO.Rslt[Human_clinical_cleaned$TIO.Rslt==0.12]<- 0.125  
+table(Human_clinical_cleaned$TIO.Rslt, Human_clinical_cleaned$TIO.Equiv) #put MIC 0.12 isolate into 0.125
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$TIO) 
+table(Human_clinical_cleaned$TIO.Rslt)  
+
+#lumb category 16 isolates into >= 8 category 
+Human_clinical_cleaned$TIO.Rslt[Human_clinical_cleaned$TIO.Rslt==16]<- 8   
+table(Human_clinical_cleaned$TIO.Rslt)
+```
+
+### FOX
+
+##### Initial FOX MIC Values
+
+```{r}
+table(Human_clinical$FOX.Rslt, Human_clinical$FOX.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("FOX.Rslt",names(Human_clinical_cleaned)) #gives column number of FOX
+  col.number.sign<-match("FOX.Rslt",names(Human_clinical_cleaned))-1 #gives column number of FOX. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="4"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+    else if (Human_clinical_cleaned[x, col.number]=="1"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]==">"){
+    if (Human_clinical_cleaned[x, col.number]=="16"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$FOX.Rslt, Human_clinical_cleaned$FOX.Equiv)
+```
+
+### AMC (Called AUG in Human Dataframe by CDC)
+
+##### Initial AMC MIC Values
+
+```{r}
+table(Human_clinical$AUG.Rslt, Human_clinical$AUG.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("AUG.Rslt",names(Human_clinical_cleaned)) #gives column number of AUG
+  col.number.sign<-match("AUG.Rslt",names(Human_clinical_cleaned))-1 #gives column number of AUG. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="2"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$AUG.Rslt, Human_clinical_cleaned$AUG.Equiv)  
+```
+
+##### Account for Levels in Human_clinical_cleaned not in NARMS_Cattle_Combined_Cleaned
+
+```{r}
+table(NARMSCattleCombined_cleaned$AMC) 
+table(Human_clinical_cleaned$AUG.Rslt) 
+
+#lumb category 0.5 isolates into <=1 category 
+Human_clinical_cleaned$AUG.Rslt[Human_clinical_cleaned$AUG.Rslt==0.5]<- 1   
+table(Human_clinical_cleaned$AUG.Rslt)
+```
+
+### KAN
+
+##### Initial KAN MIC Values
+
+```{r}
+table(Human_clinical$KAN.Rslt, Human_clinical$KAN.Equiv)
+```
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("KAN.Rslt",names(Human_clinical_cleaned)) #gives column number of KAN
+  col.number.sign<-match("KAN.Rslt",names(Human_clinical_cleaned))-1 #gives column number of KAN. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="16"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  } else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$KAN.Rslt, Human_clinical_cleaned$KAN.Equiv)
+```
+
+### GEN
+
+##### Initial GEN MIC Values:
+
+```{r}
+table(Human_clinical$GEN.Rslt, Human_clinical$GEN.Equiv) #No unresolved MICs
+```
+
+### AMI
+
+##### Initial AMI MIC Values
+
+```{r}
+table(Human_clinical$AMI.Rslt, Human_clinical$AMI.Equiv)
+```
+
+##### Resolve Signs
+
+##### Resolve Signs
+
+```{r}
+for (x in 1:nrow(Human_clinical_cleaned)) {
+  #print(x)
+  col.number<-match("AMI.Rslt",names(Human_clinical_cleaned)) #gives column number of AMI
+  col.number.sign<-match("AMI.Rslt",names(Human_clinical_cleaned))-1 #gives column number of AMI. sign
+  if (is.na(Human_clinical_cleaned[x,col.number])){
+    #print(x)
+    x=x+1 #If the value is NA, skip to next index
+  }
+  else if (Human_clinical_cleaned[x,col.number.sign]=="<="){
+    if (Human_clinical_cleaned[x, col.number]=="4"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+    }
+  }
+  else if (Human_clinical_cleaned[x,col.number]=="12"){
+      Human_clinical_cleaned[x, col.number]<-NA #make NA because MIC value cannot be resolved
+  }
+  else {
+      #print("data in this row is fine") #otherwise advance to next index
+    }
+  x=x+1
+}
+```
+
+##### Make Sure Removed Unresolved MICs:
+
+```{r}
+table(Human_clinical_cleaned$AMI.Rslt, Human_clinical_cleaned$AMI.Equiv)
+```
+
+### Pair Down Dataframe to Only Columns of interest:
+
+```{r}
+#select only columns of interest
+Human_clinical_cleaned<- Human_clinical_cleaned%>%
+  select(Data.Year, TET.Rslt, NAL.Rslt, CIP.Rslt, CHL.Rslt, AMP.Rslt, AZM.Rslt, COT.Rslt, FIS.Rslt, AXO.Rslt, FOX.Rslt, TIO.Rslt, AUG.Rslt, KAN.Rslt, GEN.Rslt, AMI.Rslt)
+
+#make columns have same name labels as labels used in RF
+Human_clinical_cleaned<- Human_clinical_cleaned%>%
+  rename(
+    Year= Data.Year,
+    TET= TET.Rslt,
+    NAL= NAL.Rslt,
+    CIP= CIP.Rslt,
+    CHL= CHL.Rslt,
+    AMP= AMP.Rslt,
+    AZI= AZM.Rslt,
+    COT= COT.Rslt,
+    FIS= FIS.Rslt,
+    AXO= AXO.Rslt,
+    FOX= FOX.Rslt,
+    TIO= TIO.Rslt,
+    AMC= AUG.Rslt,
+    KAN= KAN.Rslt,
+    GEN= GEN.Rslt,
+    AMI= AMI.Rslt
+  )
+```
+
+### Make AM Variables Ordinal for RF:
+
+```{r}
+Human_clinical_ordinal<- Human_clinical_cleaned
+```
+
+```{r}
+#Make all AMs ordinals instead of numerics
+Human_clinical_ordinal$AMC<-ordered(Human_clinical_ordinal$AMC, levels= c(1, 2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$AMP<-ordered(Human_clinical_ordinal$AMP, levels= c(1, 2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$AXO<-ordered(Human_clinical_ordinal$AXO, levels= c(0.25, 0.5, 1, 2, 4, 8, 16, 32, 64))
+
+Human_clinical_ordinal$AZI<-ordered(Human_clinical_ordinal$AZI, levels= c(0.25, 0.5, 1, 2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$CHL<-ordered(Human_clinical_ordinal$CHL, levels= c(2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$CIP<-ordered(Human_clinical_ordinal$CIP, levels= c(0.015, 0.03, 0.06, 0.125, 0.25, 0.5, 1, 2, 4))
+
+Human_clinical_ordinal$COT<-ordered(Human_clinical_ordinal$COT, levels= c(0.125, 0.25, 0.5, 1, 2, 4))
+
+Human_clinical_ordinal$FIS<-ordered(Human_clinical_ordinal$FIS, levels= c(16, 32, 64, 128, 256))
+
+Human_clinical_ordinal$FOX<-ordered(Human_clinical_ordinal$FOX, levels= c(0.5, 1, 2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$GEN<-ordered(Human_clinical_ordinal$GEN, levels= c(0.25, 0.5, 1, 2, 4, 8, 16))
+
+Human_clinical_ordinal$TET<-ordered(Human_clinical_ordinal$TET, levels= c(4, 8, 16, 32))
+
+Human_clinical_ordinal$TIO<-ordered(Human_clinical_ordinal$TIO, levels= c(0.125, 0.25, 0.5, 1, 2, 4, 8))
+
+Human_clinical_ordinal$NAL<-ordered(Human_clinical_ordinal$NAL, levels= c(0.5, 1, 2, 4, 8, 16, 32))
+
+Human_clinical_ordinal$KAN<-ordered(Human_clinical_ordinal$KAN, levels= c(8, 16, 32, 64))
+
+Human_clinical_ordinal$AMI<-ordered(Human_clinical_ordinal$AMI, levels= c(0.5, 1, 2, 4, 8, 16))
+
+```

@@ -1,0 +1,191 @@
+### Look at +/-2 Category Accuracies
+
+MIC data distributions can have a =/-2 dilutions margin of error (why quality control ranges for susceptibility testing machines are so big)
+
+##### AMC
+
+```{r}
+PlusorMinus2_overall(final_AMC_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_AMC_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |          |
+|-----|----------|
+| 1   | 1.000000 |
+| 2   | 1.000000 |
+| 4   | 0.999505 |
+| 8   | 0.997449 |
+| 16  | 1.000000 |
+| 32  | 0.968750 |
+
+##### AMI
+
+```{r}
+PlusorMinus2_overall(final_AMI_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_AMI_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 1   | 0.9473684 |
+| 2   | 0.9974874 |
+| 4   | 1.0000000 |
+| 8   | 0.9375000 |
+| 16  | 1.0000000 |
+
+##### AMP
+
+```{r}
+PlusorMinus2_overall(final_AMP_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_AMP_RF_ConMat)
+```
+
+|     |           |
+|-----|-----------|
+| 1   | 0.9065156 |
+| 2   | 0.9136454 |
+| 4   | 0.9098954 |
+| 8   | 0.9782609 |
+| 16  | 0.7500000 |
+| 32  | 0.7861272 |
+
+##### CHL
+
+```{r}
+PlusorMinus2_overall(final_CHL_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_CHL_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 4   | 0.9400826 |
+| 8   | 1.0000000 |
+| 16  | 1.0000000 |
+| 32  | 0.9589041 |
+
+##### CIP
+
+```{r}
+table(CIP.RF.df$CIP)
+```
+
++/-2 category accuracy could not be calculated because there are only 3 levels, so any prediction value is within +/-2 categories
+
+##### COT
+
+```{r}
+PlusorMinus2_overall(final_COT_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_COT_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|       |           |
+|-------|-----------|
+| 0.125 | 0.9911765 |
+| 0.5   | 1.0000000 |
+| 2     | 1.0000000 |
+| 4     | 0.9250000 |
+
+##### FIS
+
+```{r}
+PlusorMinus2_overall(final_FIS_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_FIS_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 16  | 0.8963391 |
+| 32  | 1.0000000 |
+| 128 | 1.0000000 |
+| 256 | 0.9498681 |
+
+##### FOX
+
+```{r}
+PlusorMinus2_overall(final_FOX_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_FOX_RF_ConMat)
+```
+
+| **MIC isolate category** | **Proportion_of_Isolates** |
+|:-------------------------|:---------------------------|
+
+|     |           |
+|-----|-----------|
+| 2   | 0.9352708 |
+| 4   | 0.9950690 |
+| 8   | 1.0000000 |
+| 16  | 0.9200000 |
+| 32  | 0.9230769 |
+
+##### TET
+
+```{r}
+PlusorMinus2_overall(final_TET_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_TET_RF_ConMat)
+```
+
+|     |           |
+|-----|-----------|
+| 4   | 0.9544271 |
+| 8   | 1.0000000 |
+| 16  | 1.0000000 |
+| 32  | 0.6798088 |
+
+##### TIO
+
+```{r}
+PlusorMinus2_overall(final_TIO_RF_ConMat)
+```
+
+```{r}
+PlusorMinus2_ConMat_Accuracy(final_TIO_RF_ConMat)
+```
+
+|       |           |
+|-------|-----------|
+| 0.125 | 1.0000000 |
+| 0.25  | 0.9885877 |
+| 0.5   | 0.9976825 |
+| 1     | 1.0000000 |
+| 2     | 1.0000000 |
+| 4     | 1.0000000 |
+| 8     | 0.9285714 |
