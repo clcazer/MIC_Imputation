@@ -1,0 +1,125 @@
+---
+title: "BreakpointCrossing"
+format: html
+editor: visual
+---
+
+## AMC
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_AMC_RF_ConMat, 8)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_AMC_RF_ConMat, 16)
+```
+
+## AMI
+
+All isolates were susceptible so both are 0%
+
+##### Susceptible/Intermediate Crossing: 0%
+
+##### Intermediate/Resistant Crossing: 0%
+
+## AMP
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_AMP_RF_ConMat, 8)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_AMP_RF_ConMat, 16)
+```
+
+## CHL
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_CHL_RF_ConMat, 8)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_CHL_RF_ConMat, 16)
+```
+
+## CIP
+
+There is no intermediate category for ciprofloxacin
+
+##### Susceptible/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_CIP_RF_ConMat, 0.06)
+```
+
+## COT
+
+No intermediate category for COT
+
+##### Susceptible/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_COT_RF_ConMat, 2)
+```
+
+## FIS
+
+All isolates were susceptible so both are 0%
+
+##### Susceptible/Intermediate Crossing
+
+##### Intermediate/Resistant Crossing
+
+## FOX
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_FOX_RF_ConMat, 8)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_FOX_RF_ConMat, 16)
+```
+
+## TET
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_TET_RF_ConMat, 4)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_TET_RF_ConMat, 8)
+```
+
+## TIO
+
+##### Susceptible/Intermediate Crossing
+
+```{r}
+BreakpointCrossing(final_TIO_RF_ConMat, 2)
+```
+
+##### Intermediate/Resistant Crossing
+
+```{r}
+BreakpointCrossing(final_TIO_RF_ConMat, 4)
+```
